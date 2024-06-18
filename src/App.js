@@ -46,6 +46,9 @@ function App() {
     fetchUserAddToCart()
 
   },[])
+  // This goes in your main file (e.g., index.js or App.js)
+
+
   return (
     <>
       <Context.Provider value={{

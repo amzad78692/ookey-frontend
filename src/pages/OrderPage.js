@@ -2,17 +2,21 @@ import React,{useEffect, useState} from 'react'
 import SummaryApi from '../common'
 import momemt from "moment"
 import displayINRCurrency from '../helpers/displayCurrency'
+import Loader from '../components/loader/loader'
 
 
 const OrderPage = () => {
   const [data,setData] = useState([])
+  const [loader,setLoader] = useState(false)
   const fetchOrderDetails = async() => {
+    setLoader(true)
     const response = await fetch(SummaryApi.getOrder.url,{
       method:SummaryApi.getOrder.method,
       credentials:'include'
     })
     const responseData = await response.json()
     setData(responseData.data)
+    setLoader(false)
   }
 
   useEffect(()=>{
@@ -20,6 +24,7 @@ const OrderPage = () => {
   },[])
   return (
     <div>
+      {loader?<Loader/>:<>
       {
         !data[0] && (
           <p className='text-center text-red-400 text-lg mt-5 font-bold'>No Order Available...</p>
@@ -80,6 +85,7 @@ const OrderPage = () => {
             })
         }
       </div>
+      </>}
     </div>
   )
 }

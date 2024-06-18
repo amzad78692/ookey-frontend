@@ -3,10 +3,12 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import productCategory from '../helpers/productCategory'
 import VerticalCard from '../components/VerticalCard'
 import SummaryApi from '../common'
+import Loader from '../components/loader/loader'
 
 const CategoryProduct = () => {
     const [data,setData] = useState([])
     const navigate = useNavigate()
+    const [loader,setLoader] = useState(false)
     const [loading,setLoading] = useState(false)
     const location = useLocation()
     const urlSearch = new URLSearchParams(location.search)
@@ -17,12 +19,14 @@ const CategoryProduct = () => {
       urlCategoryListObject[el] = true
     })
 
+
     const [selectCategory,setSelectCategory] = useState(urlCategoryListObject)
     const [filterCategoryList,setFilterCategoryList] = useState([])
 
     const [sortBy,setSortBy] = useState("")
 
     const fetchData = async()=>{
+      setLoader(true)
       const response = await fetch(SummaryApi.filterProduct.url,{
         method : SummaryApi.filterProduct.method,
         headers : {
@@ -35,6 +39,7 @@ const CategoryProduct = () => {
 
       const dataResponse = await response.json()
       setData(dataResponse?.data || [])
+      setLoader(false)
     }
 
     const handleSelectCategory = (e) =>{
@@ -96,7 +101,7 @@ const CategoryProduct = () => {
     <div className='container mx-auto p-4'>
 
        {/***desktop version */}
-       <div className='hidden lg:grid grid-cols-[200px,1fr]'>
+       <div className=' lg:grid grid-cols-[200px,1fr]'>
            {/***left side */}
            <div className='bg-white p-2 min-h-[calc(100vh-120px)] overflow-y-scroll'>
                 {/**sort by */}
@@ -121,11 +126,11 @@ const CategoryProduct = () => {
                 <div className=''>
                     <h3 className='text-base uppercase font-medium text-slate-500 border-b pb-1 border-slate-300'>Category</h3>
 
-                    <form className='text-sm flex flex-col gap-2 py-2'>
+                    <form className='text-sm flex flex-col gap-2 py-2 '>
                         {
                           productCategory.map((categoryName,index)=>{
                             return(
-                              <div className='flex items-center gap-3'>
+                              <div className='flex items-center gap-3 '>
                                  <input type='checkbox' name={"category"} checked={selectCategory[categoryName?.value]} value={categoryName?.value} id={categoryName?.value} onChange={handleSelectCategory} />
                                  <label htmlFor={categoryName?.value}>{categoryName?.label}</label>
                               </div>
@@ -141,6 +146,7 @@ const CategoryProduct = () => {
 
             {/***right side ( product ) */}
             <div className='px-4'>
+              {loader?<Loader/>:<>
               <p className='font-medium text-slate-800 text-lg my-2'>Search Results : {data.length}</p>
 
              <div className='min-h-[calc(100vh-120px)] overflow-y-scroll max-h-[calc(100vh-120px)]'>
@@ -150,6 +156,7 @@ const CategoryProduct = () => {
                   )
               }
              </div>
+             </>}
             </div>
        </div>
        

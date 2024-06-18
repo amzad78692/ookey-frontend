@@ -9,10 +9,13 @@ import Loader from "../components/loader/loader";
 const Cart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loader, setLoader] = useState(false);
+  const [paymentState, setPaymentState] = useState("Payment");
   const context = useContext(Context);
   const loadingCart = new Array(4).fill(null);
 
   const fetchData = async () => {
+    setLoader(true)
     const response = await fetch(SummaryApi.addToCartProductView.url, {
       method: SummaryApi.addToCartProductView.method,
       credentials: "include",
@@ -26,6 +29,7 @@ const Cart = () => {
     if (responseData.success) {
       setData(responseData.data);
     }
+    setLoader(false)
   };
 
   const handleLoading = async () => {
@@ -101,6 +105,7 @@ const Cart = () => {
   };
 
   const handlePayment = async () => {
+    setPaymentState("Processing...")
     const stripePromise = await loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY)
     const response = await fetch(SummaryApi.payment.url, {
         method: SummaryApi.payment.method,
@@ -116,7 +121,7 @@ const Cart = () => {
     if(responseData?.id){
       stripePromise.redirectToCheckout({sessionId:responseData.id})
     }
-    console.log("payment",responseData)
+    setPaymentState("Payment")
   };
 
   const totalQty = data.reduce(
@@ -129,6 +134,7 @@ const Cart = () => {
   );
   return (
     <div className="container mx-auto">
+      {loader?<Loader/>:<>
       <div className="text-center text-lg my-3">
         {data.length === 0 && !loading && (
           <p className="bg-white py-5">No Data</p>
@@ -231,13 +237,14 @@ const Cart = () => {
                   className="bg-blue-600 p-2 text-white w-full mt-2"
                   onClick={handlePayment}
                 >
-                  Payment
+                  {paymentState}
                 </button>
               </div>
             )}
           </div>
         )}
       </div>
+      </>}
     </div>
   );
 };

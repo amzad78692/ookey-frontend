@@ -13,7 +13,6 @@ const AllOrder = () => {
     })
     const responseData = await response.json()
     setData(responseData.data)
-    // console.log("ojdsjder list", responseData)
   }
 
 
