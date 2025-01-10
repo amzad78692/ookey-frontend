@@ -4,9 +4,6 @@ import Home from '../pages/Home'
 import Login from '../pages/Login'
 import ForgotPassowrd from '../pages/ForgotPassowrd'
 import SignUp from '../pages/SignUp'
-import AdminPanel from '../pages/AdminPanel'
-import AllUsers from '../pages/AllUsers'
-import AllProducts from '../pages/AllProducts'
 import CategoryProduct from '../pages/CategoryProduct'
 import ProductDetails from '../pages/ProductDetails'
 import Cart from '../pages/Cart'
@@ -14,7 +11,14 @@ import SearchProduct from '../pages/SearchProduct'
 import Success from '../pages/Success'
 import Cancel from '../pages/Cancel'
 import OrderPage from '../pages/OrderPage'
-import AllOrder from '../pages/AllOrder'
+import DashboardLayout from '../components/admin/DashboardLayout'
+import Overview from '../pages/admin/Overview'
+import AuthGuard from '../components/admin/AuthGuard'
+import ProductManagement from '../pages/admin/ProductManagement'
+import RealEstateManagement from '../pages/admin/RealEstateManagement'
+import UserManagement from '../pages/admin/UserManagement'
+import Reports from '../pages/admin/Reports'
+import OrderManagement from '../pages/admin/OrderManagement'
 
 const router = createBrowserRouter([
     {
@@ -67,25 +71,36 @@ const router = createBrowserRouter([
             },
             {
                 path : "admin-panel",
-                element : <AdminPanel/>,
+                element : <AuthGuard><DashboardLayout/></AuthGuard>,
                 children : [
                     {
-                        path : "all-users",
-                        element : <AllUsers/>
+                        path : "",
+                        element : <Overview/>
                     },
                     {
-                        path : "all-products",
-                        element : <AllProducts/>
+                        path : "users",
+                        element : <UserManagement/>
                     },
                     {
-                        path : "all-order",
-                        element : <AllOrder/>
+                        path : "products",
+                        element : <ProductManagement/>
+                    },
+                    {
+                        path : "real-estate",
+                        element : <RealEstateManagement/>
+                    },
+                    {
+                        path : "orders",
+                        element : <OrderManagement/>
+                    },
+                    {
+                        path : "reports",
+                        element : <Reports/>
                     }
                 ]
             },
         ]
     }
 ])
-
 
 export default router

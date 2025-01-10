@@ -1,10 +1,8 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import loginIcons from '../assest/signin.gif';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
-import SummaryApi from '../common';
 import { toast } from 'react-toastify';
-import Context from '../context';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,7 +10,12 @@ const Login = () => {
   const [data, setData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const { fetchUserDetails, fetchUserAddToCart } = useContext(Context);
+
+  // Static admin credentials
+  const ADMIN_CREDENTIALS = {
+    email: "amzad.nnt@gmail.com",
+    password: "Amzad@123"
+  };
 
   const validateForm = () => {
     let valid = true;
@@ -42,29 +45,24 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setLoader("Processing...");
-    const dataResponse = await fetch(SummaryApi.signIn.url, {
-      method: SummaryApi.signIn.method,
-      credentials: 'include',
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
 
-    const dataApi = await dataResponse.json();
-    if (dataApi.success) {
-      toast.success(dataApi.message);
-      navigate('/');
-      fetchUserDetails();
-      fetchUserAddToCart();
-    } else if (dataApi.error) {
-      toast.error(dataApi.message);
+    // Check static credentials
+    if (data.email === ADMIN_CREDENTIALS.email && data.password === ADMIN_CREDENTIALS.password) {
+      // Set admin status in localStorage
+      localStorage.setItem('isAdmin', 'true');
+      localStorage.setItem('userEmail', data.email);
+      
+      toast.success("Login successful!");
+      navigate('/admin-panel');
+    } else {
+      toast.error("Invalid credentials!");
     }
+    
     setLoader("Login");
   };
 
@@ -115,46 +113,34 @@ const Login = () => {
               <label className="absolute left-3 top-3 text-gray-500 text-sm peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-xs peer-focus:text-green-600 transition">
                 Password
               </label>
-              <div
-                className="absolute right-3 top-3 text-xl text-gray-500 hover:text-gray-700 cursor-pointer"
-                onClick={() => setShowPassword((prev) => !prev)}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </div>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-              )}
+              </button>
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
-            <Link
-              to={'/forgot-password'}
-              className="block w-fit ml-auto text-sm text-green-700 hover:underline hover:text-green-600 transition-all"
-            >
-              Forgot password?
-            </Link>
 
             {/* Submit Button */}
             <button
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 w-full rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 flex justify-center items-center"
               type="submit"
+              className="bg-gradient-to-r from-green-400 to-yellow-400 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
             >
-              {loader === "Processing..." ? (
-                <div className="loader border-t-2 border-b-2 border-white w-5 h-5 rounded-full animate-spin"></div>
-              ) : (
-                loader
-              )}
+              {loader}
             </button>
-          </form>
 
-          {/* Sign Up Link */}
-          <p className="mt-6 text-center text-gray-700 text-sm">
-            Don't have an account?{" "}
-            <Link
-              to="/sign-up"
-              className="text-green-700 hover:text-green-600 hover:underline transition-all"
-            >
-              Sign up
-            </Link>
-          </p>
+            {/* Links */}
+            <div className="flex justify-between text-sm">
+              <Link to="/forgot-password" className="text-green-600 hover:text-green-700">
+                Forgot Password?
+              </Link>
+              <Link to="/sign-up" className="text-green-600 hover:text-green-700">
+                Create Account
+              </Link>
+            </div>
+          </form>
         </div>
       </div>
     </section>
