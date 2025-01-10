@@ -19,6 +19,7 @@ import RealEstateManagement from '../pages/admin/RealEstateManagement'
 import UserManagement from '../pages/admin/UserManagement'
 import Reports from '../pages/admin/Reports'
 import OrderManagement from '../pages/admin/OrderManagement'
+import DelieverySignUp from '../pages/DelieverySignUp'
 
 const router = createBrowserRouter([
     {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
             {
                 path : "sign-up",
                 element : <SignUp/>
+            },
+            {
+                path : "delivery-partner",
+                element : <DelieverySignUp/>
             },
             {
                 path : "product-category",

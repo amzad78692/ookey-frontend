@@ -2,11 +2,11 @@ const backendDomin = process.env.REACT_APP_BACKEND_DOMAIN
 
 const SummaryApi = {
     signUP : {
-        url : `${backendDomin}/api/signup`,
+        url : `${backendDomin}/api/user/register`,
         method : "post"
     },
     signIn : {
-        url : `${backendDomin}/api/signin`,
+        url : `${backendDomin}/api/user/login`,
         method : "post"
     },
     current_user : {
