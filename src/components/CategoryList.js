@@ -1,52 +1,77 @@
-import React, { useEffect, useState } from 'react'
-import SummaryApi from '../common'
+import React from 'react'
 import { Link } from 'react-router-dom'
+import { FaCarrot, FaAppleAlt, FaHome, FaLeaf, FaLemon, FaWarehouse } from 'react-icons/fa'
+
+const categories = [
+  {
+    id: 1,
+    name: 'Vegetables',
+    icon: <FaCarrot className="w-8 h-8" />,
+    color: 'bg-green-100',
+    textColor: 'text-green-600',
+    link: '/product-category?category=vegetables'
+  },
+  {
+    id: 2,
+    name: 'Fruits',
+    icon: <FaAppleAlt className="w-8 h-8" />,
+    color: 'bg-red-100',
+    textColor: 'text-red-600',
+    link: '/product-category?category=fruits'
+  },
+  {
+    id: 3,
+    name: 'Organic',
+    icon: <FaLeaf className="w-8 h-8" />,
+    color: 'bg-emerald-100',
+    textColor: 'text-emerald-600',
+    link: '/product-category?category=organic'
+  },
+  {
+    id: 4,
+    name: 'Citrus',
+    icon: <FaLemon className="w-8 h-8" />,
+    color: 'bg-yellow-100',
+    textColor: 'text-yellow-600',
+    link: '/product-category?category=citrus'
+  },
+  {
+    id: 5,
+    name: 'Houses',
+    icon: <FaHome className="w-8 h-8" />,
+    color: 'bg-blue-100',
+    textColor: 'text-blue-600',
+    link: '/real-estate?type=houses'
+  },
+  {
+    id: 6,
+    name: 'Commercial',
+    icon: <FaWarehouse className="w-8 h-8" />,
+    color: 'bg-purple-100',
+    textColor: 'text-purple-600',
+    link: '/real-estate?type=commercial'
+  }
+]
 
 const CategoryList = () => {
-    const [categoryProduct,setCategoryProduct] = useState([])
-    const [loading,setLoading] = useState(false)
-
-    const categoryLoading = new Array(13).fill(null)
-
-    const fetchCategoryProduct = async() =>{
-        setLoading(true)
-        const response = await fetch(SummaryApi.categoryProduct.url)
-        const dataResponse = await response.json()
-        setLoading(false)
-        setCategoryProduct(dataResponse.data)
-    }
-
-    useEffect(()=>{
-        fetchCategoryProduct()
-    },[])
-
   return (
-    <div className='container mx-auto p-4'>
-           <div className='flex items-center gap-4 justify-between overflow-scroll scrollbar-none'>
-            {
-
-                loading ? (
-                    categoryLoading.map((el,index)=>{
-                            return(
-                                <div className='h-16 w-16 md:w-20 md:h-20 rounded-full overflow-hidden bg-slate-200 animate-pulse' key={"categoryLoading"+index}>
-                                </div>
-                            )
-                    })  
-                ) :
-                (
-                    categoryProduct.map((product,index)=>{
-                        return(
-                            <Link to={"/product-category?category="+product?.category} className='cursor-pointer' key={product?.category}>
-                                <div className='w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden p-4 bg-slate-200 flex items-center justify-center'>
-                                    <img src={product?.productImage[0]} alt={product?.category} className='h-full object-scale-down mix-blend-multiply hover:scale-125 transition-all'/>
-                                </div>
-                                <p className='text-center text-sm md:text-base capitalize'>{product?.category}</p>
-                            </Link>
-                        )
-                    })
-                )
-            }
-           </div>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {categories.map((category) => (
+        <Link
+          to={category.link}
+          key={category.id}
+          className="group"
+        >
+          <div className={`${category.color} rounded-xl p-6 transition-all duration-300 transform hover:scale-105 flex flex-col items-center justify-center gap-3 hover:shadow-lg`}>
+            <div className={`${category.textColor}`}>
+              {category.icon}
+            </div>
+            <h3 className={`text-sm md:text-base font-semibold ${category.textColor}`}>
+              {category.name}
+            </h3>
+          </div>
+        </Link>
+      ))}
     </div>
   )
 }

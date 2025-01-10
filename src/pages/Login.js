@@ -1,123 +1,192 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import loginIcons from '../assest/signin.gif';
-import SummaryApi from '../common';
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaEnvelope, FaLock, FaGoogle, FaFacebook, FaApple, FaEye, FaEyeSlash } from 'react-icons/fa'
+import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+import { useDispatch } from 'react-redux'
+import { setUser } from '../redux/slices/authSlice'
 
 const Login = () => {
-  const [loader, setLoader] = useState("Login");
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { register, handleSubmit, formState: { errors } } = useForm()
 
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors,isSubmitting },
-  } = useForm();
-
-  // Regular expressions for validation
-  const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-  const mobilePattern = /^[0-9]{10}$/; // Adjust this regex based on your country's mobile format
-
-  // Form submit handler
-  const onSubmit = async(data) => {
-
-    // Check if the input is email or mobile
-
-      const response = await fetch(SummaryApi.signIn.url, {
-        method: SummaryApi.signUP.method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email:data.emailOrMobile,password:data.password }),
-      });
-  
-      const result = await response.json();
-      console.log(result)
-  
-      if (result.status) {
-        toast.success(result.message);
-        reset()
-        navigate('/');
-      } else {
-        toast.error(result.message);
-      }
-
-  };
+  const onSubmit = async (data) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      setTimeout(() => {
+        // Store user data in Redux
+        dispatch(setUser({
+          email: data.email,
+          name: 'User Name', // This would come from your API
+          isLoggedIn: true
+        }))
+        
+        // Show success message
+        toast.success('Successfully logged in! Welcome back!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        })
+        
+        setIsLoading(false)
+        navigate('/')
+      }, 1500)
+    } catch (error) {
+      toast.error('Login failed. Please try again.')
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <section
-      id="login"
-      className="bg-gradient-to-r from-[#73EC8B] to-[#FEFF9F] min-h-screen flex items-center justify-center"
-    >
-      <div className="container mx-auto px-6 py-12 flex justify-center items-center">
-        <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md transform transition-all hover:scale-105">
-          {/* Login Icon */}
-          <div className="w-24 h-24 mx-auto">
-            <img src={loginIcons} alt="Login Icon" className="rounded-full shadow-md" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-xl p-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Welcome Back!</h2>
+          <p className="text-sm text-gray-600">
+            Sign in to access your account
+          </p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          <div className="space-y-4">
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaEnvelope className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address"
+                    }
+                  })}
+                  type="email"
+                  className="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Email address"
+                />
+              </div>
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+            </div>
+
+            <div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters"
+                    }
+                  })}
+                  type={showPassword ? "text" : "password"}
+                  className="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                  placeholder="Password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+            </div>
           </div>
 
-          {/* Form */}
-          <form className="pt-6 flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
-            {/* Email or Mobile Field */}
-            <div className="relative">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
               <input
-                type="text"
-                placeholder="Email or Mobile"
-                {...register('emailOrMobile', {
-                  required: 'Email or Mobile is required.',
-                  validate: value => emailPattern.test(value) || mobilePattern.test(value) || 'Please enter a valid email or mobile number.',
-                })}
-                className={`peer bg-gray-100 p-3 rounded-lg w-full text-gray-700 outline-none focus:ring-2 focus:ring-green-500 transition ${errors.emailOrMobile ? 'ring-2 ring-red-500' : ''}`}
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
               />
-              {errors.emailOrMobile && (
-                <p className="text-red-500 text-xs mt-1">{errors.emailOrMobile.message}</p>
-              )}
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Remember me
+              </label>
             </div>
 
-            {/* Password Field */}
-            <div className="relative">
-              <input
-                type="password"
-                placeholder="Password"
-                {...register('password', {
-                  required: 'Password is required.',
-                  minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters long.',
-                  },
-                })}
-                className={`peer bg-gray-100 p-3 rounded-lg w-full text-gray-700 outline-none focus:ring-2 focus:ring-green-500 transition ${errors.password ? 'ring-2 ring-red-500' : ''}`}
-              />
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
-              )}
+            <div className="text-sm">
+              <Link to="/forgot-password" className="font-medium text-green-600 hover:text-green-500">
+                Forgot password?
+              </Link>
             </div>
+          </div>
 
-            {/* Submit Button */}
+          <div>
             <button
               type="submit"
-              className="bg-gradient-to-r from-green-400 to-yellow-400 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
             >
-              {loader}
+              {isLoading ? (
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                'Sign in'
+              )}
             </button>
+          </div>
 
-            {/* Links */}
-            <div className="flex justify-between text-sm">
-              <Link to="/forgot-password" className="text-green-600 hover:text-green-700">
-                Forgot Password?
-              </Link>
-              <Link to="/sign-up" className="text-green-600 hover:text-green-700">
-                Create Account
-              </Link>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
             </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  );
-};
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
 
-export default Login;
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              type="button"
+              className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <FaGoogle className="h-5 w-5 text-red-500" />
+            </button>
+            <button
+              type="button"
+              className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <FaFacebook className="h-5 w-5 text-blue-600" />
+            </button>
+            <button
+              type="button"
+              className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <FaApple className="h-5 w-5 text-gray-900" />
+            </button>
+          </div>
+
+          <p className="text-center text-sm text-gray-600">
+            Don't have an account?{' '}
+            <Link to="/sign-up" className="font-medium text-green-600 hover:text-green-500">
+              Sign up now
+            </Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default Login

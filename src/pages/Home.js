@@ -1,26 +1,47 @@
 import React from 'react'
 import CategoryList from '../components/CategoryList'
-import BannerProduct from '../components/BannerProduct'
-import HorizontalCardProduct from '../components/HorizontalCardProduct'
-import VerticalCardProduct from '../components/VerticalCardProduct'
+import HeroSection from '../components/HeroSection'
+import FeaturedProducts from '../components/FeaturedProducts'
+import RealEstateShowcase from '../components/RealEstateShowcase'
+import WhyChooseUs from '../components/WhyChooseUs'
+import Newsletter from '../components/Newsletter'
 
 const Home = () => {
   return (
-    <div>
-      <CategoryList/>
-      <BannerProduct/>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <HeroSection />
 
-      <HorizontalCardProduct category={"airpodes"} heading={"Top's Airpodes"}/>
-      <HorizontalCardProduct category={"watches"} heading={"Popular's Watches"}/>
+      {/* Categories */}
+      <div className="py-8 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">Shop by Category</h2>
+          <CategoryList />
+        </div>
+      </div>
 
-      <VerticalCardProduct category={"mobiles"} heading={"Mobiles"}/>
-      <VerticalCardProduct category={"Mouse"} heading={"Mouse"}/>
-      <VerticalCardProduct category={"televisions"} heading={"Televisions"}/>
-      <VerticalCardProduct category={"camera"} heading={"Camera & Photography"}/>
-      <VerticalCardProduct category={"earphones"} heading={"Wired Earphones"}/>
-      <VerticalCardProduct category={"speakers"} heading={"Bluetooth Speakers"}/>
-      <VerticalCardProduct category={"refrigerator"} heading={"Refrigerator"}/>
-      <VerticalCardProduct category={"trimmers"} heading={"Trimmers"}/>
+      {/* Featured Products Section */}
+      <div className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Featured Products</h2>
+          <FeaturedProducts category="fruits" heading="Fresh Fruits" />
+          <FeaturedProducts category="vegetables" heading="Fresh Vegetables" />
+        </div>
+      </div>
+
+      {/* Real Estate Showcase */}
+      <div className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Featured Properties</h2>
+          <RealEstateShowcase />
+        </div>
+      </div>
+
+      {/* Why Choose Us Section */}
+      <WhyChooseUs />
+
+      {/* Newsletter Section */}
+      <Newsletter />
     </div>
   )
 }
