@@ -1,107 +1,162 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import fetchCategoryWiseProduct from '../helpers/fetchCategoryWiseProduct'
-import displayINRCurrency from '../helpers/displayCurrency'
-import { FaAngleLeft, FaAngleRight } from 'react-icons/fa6'
-import { Link } from 'react-router-dom'
-import addToCart from '../helpers/addToCart'
-import Context from '../context'
-import scrollTop from '../helpers/scrollTop'
-import Loader from "../components/loader/loader";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { FaArrowRight } from 'react-icons/fa';
 
-const CategroyWiseProductDisplay = ({category, heading}) => {
-    const [data,setData] = useState([])
-    const [loading,setLoading] = useState(true)
-    const loadingList = new Array(13).fill(null)
-    const [loader, setLoader] = useState(false);
-  const [Id, setId] = useState("");
-
-    const { fetchUserAddToCart } = useContext(Context)
-
-    const handleAddToCart = async(e,id)=>{
-        setId(id);
-        setLoader(true);
-       await addToCart(e,id)
-       fetchUserAddToCart()
-       setLoader(false);
-       setId("");
+const CategoryWiseProductDisplay = () => {
+  const categories = [
+    {
+      id: 1,
+      name: 'Fresh Fruits',
+      description: 'Handpicked fresh fruits from local farms',
+      image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf',
+      products: [
+        {
+          id: 1,
+          name: 'Organic Apples',
+          price: 4.99,
+          image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6'
+        },
+        {
+          id: 2,
+          name: 'Fresh Oranges',
+          price: 3.99,
+          image: 'https://images.unsplash.com/photo-1547514701-42782101795e'
+        },
+        {
+          id: 3,
+          name: 'Strawberries',
+          price: 5.99,
+          image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2'
+        }
+      ]
+    },
+    {
+      id: 2,
+      name: 'Fresh Vegetables',
+      description: 'Farm-fresh vegetables for your daily needs',
+      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
+      products: [
+        {
+          id: 4,
+          name: 'Organic Tomatoes',
+          price: 3.49,
+          image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337'
+        },
+        {
+          id: 5,
+          name: 'Fresh Carrots',
+          price: 2.99,
+          image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37'
+        },
+        {
+          id: 6,
+          name: 'Green Lettuce',
+          price: 2.49,
+          image: 'https://images.unsplash.com/photo-1622205313162-be1d5712a43f'
+        }
+      ]
+    },
+    {
+      id: 3,
+      name: 'Grocery Items',
+      description: 'Essential grocery items for your pantry',
+      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58',
+      products: [
+        {
+          id: 7,
+          name: 'Organic Rice',
+          price: 8.99,
+          image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c'
+        },
+        {
+          id: 8,
+          name: 'Whole Grain Pasta',
+          price: 4.99,
+          image: 'https://images.unsplash.com/photo-1551462147-37885acc36f1'
+        },
+        {
+          id: 9,
+          name: 'Organic Quinoa',
+          price: 6.99,
+          image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c'
+        }
+      ]
     }
-
-
-
-
-    const fetchData = async() =>{
-        setLoading(true)
-        const categoryProduct = await fetchCategoryWiseProduct(category)
-        setLoading(false)
-
-        setData(categoryProduct?.data)
-    }
-
-    useEffect(()=>{
-        fetchData()
-    },[])
-
-
-
+  ];
 
   return (
-    <div className='container mx-auto px-4 my-6 relative'>
+    <div className="container mx-auto px-4">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Shop by Category
+        </h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Explore our wide range of products organized by categories for easy shopping
+        </p>
+      </div>
 
-            <h2 className='text-2xl font-semibold py-4'>{heading}</h2>
+      <div className="space-y-16">
+        {categories.map((category) => (
+          <div key={category.id} className="bg-white rounded-2xl shadow-md overflow-hidden">
+            {/* Category Header */}
+            <div className="relative h-64 overflow-hidden">
+              <img
+                src={category.image}
+                alt={category.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                <div className="p-6 text-white">
+                  <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
+                  <p className="text-white/80">{category.description}</p>
+                </div>
+              </div>
+            </div>
 
-                
-           <div className='grid grid-cols-[repeat(auto-fit,minmax(300px,320px))] justify-between md:gap-6 overflow-x-scroll scrollbar-none transition-all'>
-           {
+            {/* Products Grid */}
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {category.products.map((product) => (
+                  <Link
+                    key={product.id}
+                    to={`/product/${product.id}`}
+                    className="group bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-300"
+                  >
+                    <div className="relative h-48">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {product.name}
+                      </h4>
+                      <p className="text-blue-600 font-bold mt-1">
+                        ${product.price}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
 
-                loading ? (
-                    loadingList.map((product,index)=>{
-                        return(
-                            <div className='w-full min-w-[280px]  md:min-w-[320px] max-w-[280px] md:max-w-[320px]  bg-white rounded-sm shadow '>
-                                <div className='bg-slate-200 h-48 p-4 min-w-[280px] md:min-w-[145px] flex justify-center items-center animate-pulse'>
-                                </div>
-                                <div className='p-4 grid gap-3'>
-                                    <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black p-1 py-2 animate-pulse rounded-full bg-slate-200'></h2>
-                                    <p className='capitalize text-slate-500 p-1 animate-pulse rounded-full bg-slate-200  py-2'></p>
-                                    <div className='flex gap-3'>
-                                        <p className='text-red-600 font-medium p-1 animate-pulse rounded-full bg-slate-200 w-full  py-2'></p>
-                                        <p className='text-slate-500 line-through p-1 animate-pulse rounded-full bg-slate-200 w-full  py-2'></p>
-                                    </div>
-                                    <button className='text-sm  text-white px-3  rounded-full bg-slate-200  py-2 animate-pulse'></button>
-                                </div>
-                            </div>
-                        )
-                    })
-                ) : (
-                    data.map((product,index)=>{
-                        return(
-                            <Link to={"/product/"+product?._id} className='w-full min-w-[280px]  md:min-w-[320px] max-w-[280px] md:max-w-[320px]  bg-white rounded-sm shadow ' onClick={scrollTop}>
-                                <div className='bg-slate-200 h-48 p-4 min-w-[280px] md:min-w-[145px] flex justify-center items-center'>
-                                    <img src={product.productImage[0]} className='object-scale-down h-full hover:scale-110 transition-all mix-blend-multiply'/>
-                                </div>
-                                <div className='p-4 grid gap-3'>
-                                    <h2 className='font-medium text-base md:text-lg text-ellipsis line-clamp-1 text-black'>{product?.productName}</h2>
-                                    <p className='capitalize text-slate-500'>{product?.category}</p>
-                                    <div className='flex gap-3'>
-                                        <p className='text-red-600 font-medium'>{ displayINRCurrency(product?.sellingPrice) }</p>
-                                        <p className='text-slate-500 line-through'>{ displayINRCurrency(product?.price)  }</p>
-                                    </div>
-                                    <button className='text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-0.5 rounded-full' onClick={(e)=>handleAddToCart(e,product?._id)}>{loader && product?._id === Id ? (
-                        <Loader />
-                      ) : (
-                        "Add to Cart"
-                      )}</button>
-                                </div>
-                            </Link>
-                        )
-                    })
-                )
-                
-            }
-           </div>
-            
-
+              {/* View All Link */}
+              <div className="mt-6 text-center">
+                <Link
+                  to={`/categories/${category.id}`}
+                  className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  View All {category.name}
+                  <FaArrowRight className="ml-2" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default CategroyWiseProductDisplay
+export default CategoryWiseProductDisplay;

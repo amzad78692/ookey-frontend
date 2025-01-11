@@ -72,8 +72,8 @@ const App = () => {
           theme="light"
         />
         
-        <Header/>
-        <main className='flex-grow pt-24'>
+        {/* <Header/> */}
+        <main className='flex-grow pt-6'>
           <Outlet/>
         </main>
       </Context.Provider>

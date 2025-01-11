@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaSearch, FaArrowRight, FaHome, FaCarrot, FaBed, FaBath, FaRuler } from 'react-icons/fa'
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('realestate')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -47,6 +48,19 @@ const HeroSection = () => {
     }, 5000)
     return () => clearInterval(timer)
   }, [activeCategory])
+
+  const handleCTAClick = () => {
+    if (activeCategory === 'realestate') {
+      navigate('/real-estate');
+    } else {
+      navigate('/product-category', { 
+        state: { 
+          category: 'produce',
+          searchQuery: searchQuery 
+        } 
+      });
+    }
+  };
 
   return (
     <div className="relative min-h-[600px] bg-gradient-to-r from-slate-50 to-blue-50 overflow-hidden">
@@ -130,8 +144,8 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex gap-4 animate-slideUp">
-              <Link
-                to={activeCategory === 'realestate' ? "/real-estate" : "/product-category"}
+              <button
+                onClick={handleCTAClick}
                 className={`
                   group px-8 py-4 text-white rounded-full hover:shadow-lg transition-all duration-300 
                   flex items-center gap-2 bg-gradient-to-r 
@@ -143,7 +157,7 @@ const HeroSection = () => {
               >
                 {categories[activeCategory].ctaText}
                 <FaArrowRight className="transform transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
+              </button>
               <Link
                 to="/contact"
                 className={`

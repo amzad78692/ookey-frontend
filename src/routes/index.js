@@ -10,6 +10,8 @@ import Cart from '../pages/Cart'
 import RealEstate from '../pages/RealEstate'
 import Profile from '../pages/Profile'
 import Orders from '../pages/Orders'
+import ProductCategory from '../pages/ProductCategory'
+import CategoryPage from '../pages/CategoryPage'
 
 const router = createBrowserRouter([
   {
@@ -33,12 +35,16 @@ const router = createBrowserRouter([
         element: <ForgotPassword />
       },
       {
-        path: 'product-category',
-        element: <CategoryProduct />
+        path: 'category/:id',
+        element: <CategoryPage />
       },
       {
         path: 'product/:id',
         element: <ProductDetails />
+      },
+      {
+        path: 'product-category',
+        element: <ProductCategory />
       },
       {
         path: 'cart',
