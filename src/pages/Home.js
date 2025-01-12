@@ -1,5 +1,6 @@
 import React from 'react'
 import HeroSection from '../components/HeroSection'
+import CategorySection from '../components/CategorySection'
 import FeaturedProducts from '../components/FeaturedProducts'
 import CategoryWiseProductDisplay from '../components/CategoryWiseProductDisplay'
 import WhyChooseUs from '../components/WhyChooseUs'
@@ -10,6 +11,11 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Categories Section */}
+      <section className="py-16">
+        <CategorySection />
+      </section>
 
       {/* Featured Products Section */}
       <section className="py-16 bg-gray-50">
