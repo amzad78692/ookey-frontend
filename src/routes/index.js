@@ -21,6 +21,10 @@ import DashboardLayout from '../components/admin/DashboardLayout'
 import DelieverySignUp from '../pages/DelieverySignUp'
 import Overview from '../pages/admin/Overview'
 import ProductManagement from '../pages/admin/ProductManagement'
+import RealEstateManagement from '../pages/admin/RealEstateManagement'
+import UserManagement from '../pages/admin/UserManagement'
+import OrderManagement from '../pages/admin/OrderManagement'
+import Reports from '../pages/admin/Reports'
 
 const router = createBrowserRouter([
   {
@@ -56,9 +60,21 @@ const router = createBrowserRouter([
             element: <ProductManagement />
           },
           {
-            path: 'all-order',
-            element: <AllOrders />
-          }
+            path: 'real-estate',
+            element: <RealEstateManagement />
+          },
+          {
+            path: 'users',
+            element: <UserManagement />
+          },
+          {
+            path: 'orders',
+            element: <OrderManagement />
+          },
+          {
+            path: 'reports',
+            element: <Reports />
+          },
         ]
       },
       {
@@ -96,7 +112,11 @@ const router = createBrowserRouter([
       {
         path: 'orders',
         element: <Orders />
-      }
+      },
+      // {
+      //   path: 'reports',
+      //   element: <Reports />
+      // },
     ]
   }
 ])
