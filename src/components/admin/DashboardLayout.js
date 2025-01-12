@@ -10,7 +10,7 @@ const DashboardLayout = () => {
 
   const menuItems = [
     { path: '/admin-panel', icon: <FiHome className="w-5 h-5" />, title: 'Overview' },
-    { path: '/admin-panel/products', icon: <FiShoppingBag className="w-5 h-5" />, title: 'Products' },
+    { path: '/admin/products', icon: <FiShoppingBag className="w-5 h-5" />, title: 'Products' },
     { path: '/admin-panel/real-estate', icon: <BsBuilding className="w-5 h-5" />, title: 'Real Estate' },
     { path: '/admin-panel/users', icon: <FiUsers className="w-5 h-5" />, title: 'Users' },
     { path: '/admin-panel/orders', icon: <FiFileText className="w-5 h-5" />, title: 'Orders' },

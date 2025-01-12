@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout, selectUser, selectIsLoggedIn } from '../redux/slices/authSlice'
 import { toast } from 'react-toastify'
+import logo from '../assest/logo.png'
 import { FaUserCircle, FaSignOutAlt, FaShoppingCart, FaHome, FaBuilding, FaCarrot, FaSearch, FaHeart } from 'react-icons/fa'
 
 const Navbar = () => {
@@ -35,10 +36,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <FaBuilding className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
-              OoKey
-            </span>
+            <img src={logo} width={80} height={80} className='rounded-full'/>
           </Link>
 
           {/* Navigation Links */}
