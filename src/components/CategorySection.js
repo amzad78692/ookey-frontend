@@ -106,7 +106,7 @@ const CategorySection = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 mt-5">
       <div className="text-center mb-16">
         <motion.h2 
           initial={{ opacity: 0, y: -20 }}

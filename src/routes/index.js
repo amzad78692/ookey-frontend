@@ -25,6 +25,8 @@ import RealEstateManagement from '../pages/admin/RealEstateManagement'
 import UserManagement from '../pages/admin/UserManagement'
 import OrderManagement from '../pages/admin/OrderManagement'
 import Reports from '../pages/admin/Reports'
+import ContactUs from '../pages/ContactUs'
+import CategoryManagement from '../pages/admin/CategoryManagement'
 
 const router = createBrowserRouter([
   {
@@ -54,6 +56,10 @@ const router = createBrowserRouter([
           {
             path: '',
             element: <Overview />
+          },
+          {
+            path: 'category',
+            element: <CategoryManagement />
           },
           {
             path: 'products',
@@ -113,10 +119,10 @@ const router = createBrowserRouter([
         path: 'orders',
         element: <Orders />
       },
-      // {
-      //   path: 'reports',
-      //   element: <Reports />
-      // },
+      {
+        path: 'contact-us',
+        element: <ContactUs />
+      },
     ]
   }
 ])

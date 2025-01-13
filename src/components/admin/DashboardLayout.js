@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { FiHome, FiShoppingBag, FiUsers, FiFileText, FiMenu, FiX } from 'react-icons/fi';
 import { BsBuilding } from 'react-icons/bs';
+import { TbCategoryPlus } from "react-icons/tb";
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 
 const DashboardLayout = () => {
@@ -10,6 +11,7 @@ const DashboardLayout = () => {
 
   const menuItems = [
     { path: '/admin', icon: <FiHome className="w-5 h-5" />, title: 'Overview' },
+    { path: '/admin/category', icon: <TbCategoryPlus className="w-5 h-5" />, title: 'Add New Category' },
     { path: '/admin/products', icon: <FiShoppingBag className="w-5 h-5" />, title: 'Products' },
     { path: '/admin/real-estate', icon: <BsBuilding className="w-5 h-5" />, title: 'Real Estate' },
     { path: '/admin/users', icon: <FiUsers className="w-5 h-5" />, title: 'Users' },

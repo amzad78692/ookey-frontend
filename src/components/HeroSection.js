@@ -159,7 +159,7 @@ const HeroSection = () => {
                 <FaArrowRight className="transform transition-transform duration-300 group-hover:translate-x-1" />
               </button>
               <Link
-                to="/contact"
+                to="/contact-us"
                 className={`
                   px-8 py-4 border-2 rounded-full transition-colors duration-300
                   ${activeCategory === 'realestate'
