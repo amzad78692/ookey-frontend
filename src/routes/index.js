@@ -4,6 +4,7 @@ import Home from '../pages/Home'
 import Login from '../pages/Login'
 import SignUp from '../pages/SignUp'
 import ForgotPassword from '../pages/ForgotPassword'
+import ResetPassword from '../pages/ResetPassword'
 import CategoryProduct from '../pages/CategoryProduct'
 import ProductDetails from '../pages/ProductDetails'
 import Cart from '../pages/CartPage'
@@ -90,6 +91,10 @@ const router = createBrowserRouter([
       {
         path: 'forgot-password',
         element: <ForgotPassword />
+      },
+      {
+        path: '/change-password/:token',
+        element: <ResetPassword />
       },
       {
         path: 'category/:id',

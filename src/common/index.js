@@ -13,6 +13,18 @@ const SummaryApi = {
         url : `${backendDomin}/api/user/reset_password_mail`,
         method : "post"
     },
+    resetPassword : {
+        url : `${backendDomin}/api/user/reset_password`,
+        method : "post"
+    },
+    uploadImage : {
+        url : `${backendDomin}/api/user/upload`,
+        method : "post"
+    },
+    addCategory : {
+        url : `${backendDomin}/api/user/upload`,
+        method : "post"
+    },
     current_user : {
         url : `${backendDomin}/api/user-details`,
         method : "get"
