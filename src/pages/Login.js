@@ -15,19 +15,23 @@ const Login = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await fetch(SummaryApi.login.url, {
-        method: SummaryApi.login.method,
+      const response = await fetch(SummaryApi.signIn.url, {
+        method: SummaryApi.signIn.method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
-        credentials: 'include',
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+        // credentials: 'include',
       });
 
       const apiData = await response.json();
 
-      if (apiData.success) {
+      if (apiData.status) {
         toast.success('Welcome back!');
+        localStorage.setItem('token__data',apiData.token)
         navigate('/');
       } else {
         toast.error(apiData.message || 'Login failed');

@@ -248,7 +248,7 @@ const DelieverySignUp = () => {
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         />
                         <FaMotorcycle className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-1 text-sm text-gray-500">Upload vehicle registration</p>
+                        <p className="mt-1 text-sm text-gray-500">Upload driving license</p>
                     </div>
                 </div>
             </div>
@@ -307,28 +307,6 @@ const DelieverySignUp = () => {
                     )}
                 </div>
 
-                <div className="relative">
-                    <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="password"
-                        placeholder="Confirm Password"
-                        {...register('confirmPassword', {
-                            validate: (val) => {
-                                if (!val) {
-                                    return "Confirm Password is required";
-                                } else if (watch('password') !== val) {
-                                    return "Passwords do not match";
-                                }
-                            }
-                        })}
-                        className={`pl-10 bg-gray-100 p-3 rounded-lg w-full text-gray-700 outline-none focus:ring-2 focus:ring-green-500 transition ${
-                            errors.confirmPassword ? 'ring-2 ring-red-500' : ''
-                        }`}
-                    />
-                    {errors.confirmPassword && (
-                        <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
-                    )}
-                </div>
             </div>
         </motion.div>
     );

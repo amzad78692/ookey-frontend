@@ -1,25 +1,46 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { FaEnvelope } from 'react-icons/fa'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import SummaryApi from '../common'
 
 const ForgotPassword = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm()
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
+    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      toast.success('Password reset link has been sent to your email!', {
-        position: "top-right",
-        autoClose: 5000,
-      })
+      const response = await fetch(SummaryApi.signIn.url, {
+        method: SummaryApi.signIn.method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+        // credentials: 'include',
+      });
+
+      const apiData = await response.json();
+
+      if (apiData.status) {
+        toast.success('Welcome back!');
+        localStorage.setItem('token__data', apiData.token)
+        navigate('/');
+      } else {
+        toast.error(apiData.message || 'Login failed');
+      }
     } catch (error) {
-      toast.error('Failed to send reset link. Please try again.')
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
