@@ -58,7 +58,7 @@ const SignUp = () => {
 
       <div className="max-w-6xl w-full space-y-8 flex flex-col md:flex-row gap-8 relative z-10">
         {/* Left Side - Welcome Message */}
-        <div className="md:w-5/12 space-y-6 hidden md:block">
+        <div className="md:w-5/12 space-y-6 hidden md:block mt-10">
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
             <h2 className="text-4xl font-bold text-gray-900 mb-4 bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
               Welcome to Ookey
@@ -100,7 +100,7 @@ const SignUp = () => {
 
         {/* Right Side - Sign Up Form */}
         <div className="md:w-7/12">
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
+          <div className="bg-white/90 mt-3 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300">
             <div className="text-center mb-8">
               <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
                 Create Account
