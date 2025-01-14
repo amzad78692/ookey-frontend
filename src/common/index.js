@@ -9,6 +9,10 @@ const SummaryApi = {
         url : `${backendDomin}/api/user/login`,
         method : "post"
     },
+    resetPasswordSendMail : {
+        url : `${backendDomin}/api/user/reset_password_mail`,
+        method : "post"
+    },
     current_user : {
         url : `${backendDomin}/api/user-details`,
         method : "get"

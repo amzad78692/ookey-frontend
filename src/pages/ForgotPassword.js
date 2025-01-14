@@ -14,14 +14,13 @@ const ForgotPassword = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await fetch(SummaryApi.signIn.url, {
-        method: SummaryApi.signIn.method,
+      const response = await fetch(SummaryApi.resetPasswordSendMail.url, {
+        method: SummaryApi.resetPasswordSendMail.method,
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: data.email,
-          password: data.password,
         }),
         // credentials: 'include',
       });
@@ -29,8 +28,7 @@ const ForgotPassword = () => {
       const apiData = await response.json();
 
       if (apiData.status) {
-        toast.success('Welcome back!');
-        localStorage.setItem('token__data', apiData.token)
+        toast.success('Check your mail');
         navigate('/');
       } else {
         toast.error(apiData.message || 'Login failed');
