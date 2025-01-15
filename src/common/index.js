@@ -25,6 +25,10 @@ const SummaryApi = {
         url : `${backendDomin}/api/category/add`,
         method : "post"
     },
+    getCategories : {
+        url : `${backendDomin}/api/category/get`,
+        method : "get"
+    },
     current_user : {
         url : `${backendDomin}/api/session/get`,
         method : "get"
