@@ -6,6 +6,9 @@ import { MdStorefront, MdVerified } from 'react-icons/md';
 import { IoStatsChart } from 'react-icons/io5';
 import EditProfileModal from '../components/modals/EditProfileModal';
 import ImageUploadModal from '../components/modals/ImageUploadModal';
+import SummaryApi from '../common';
+import { toast } from 'react-toastify';
+import { selectToken } from '../redux/slices/authSlice';
 
 const categories = [
   { name: 'Real Estate', icon: '🏠', color: 'from-blue-500 to-blue-600' },
@@ -19,6 +22,7 @@ const categories = [
 ];
 
 const Profile = () => {
+  const token = useSelector(selectToken);
   const { user } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState('profile');
   const [showEditPhoto, setShowEditPhoto] = useState(false);
@@ -27,9 +31,27 @@ const Profile = () => {
   const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
 
   // Handler functions
-  const handleProfileUpdate = (updatedData) => {
-    console.log('Updated profile data:', updatedData);
+  const handleProfileUpdate = async (updatedData) => {
+    console.log('Updated profile data:', user);
     // Implement your profile update logic here
+    const urlWithParams = `${SummaryApi.updateUser.url}?user_id=${user._id}`;
+    const response = await fetch(urlWithParams, {
+      method: SummaryApi.updateUser.method,
+      headers: {
+        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ ...updatedData }),
+    });
+
+    const result = await response.json();
+    console.log(result)
+
+    if (result.status) {
+      toast.success(result.message);
+    } else {
+      toast.error(result.message);
+    }
   };
 
   const handleImageUpload = (file) => {
@@ -45,22 +67,22 @@ const Profile = () => {
   ];
 
   const recentOrders = [
-    { 
-      id: 1, 
-      date: '2025-01-15', 
-      status: 'Delivered', 
-      total: 299.99, 
+    {
+      id: 1,
+      date: '2025-01-15',
+      status: 'Delivered',
+      total: 299.99,
       items: 3,
       products: [
         { name: 'iPhone 15 Pro', price: 199.99, image: 'https://placehold.co/50x50' },
         { name: 'AirPods Pro', price: 100.00, image: 'https://placehold.co/50x50' }
       ]
     },
-    { 
-      id: 2, 
-      date: '2025-01-10', 
-      status: 'Processing', 
-      total: 149.50, 
+    {
+      id: 2,
+      date: '2025-01-10',
+      status: 'Processing',
+      total: 149.50,
       items: 2,
       products: [
         { name: 'Nike Air Max', price: 149.50, image: 'https://placehold.co/50x50' }
@@ -85,7 +107,7 @@ const Profile = () => {
                       <FiUser className="w-10 h-10 text-blue-500" />
                     </div>
                   )}
-                  <button 
+                  <button
                     onClick={() => setIsImageUploadOpen(true)}
                     className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -109,7 +131,7 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsEditProfileOpen(true)}
                 className="mt-4 md:mt-0 bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30"
               >
@@ -173,8 +195,8 @@ const Profile = () => {
                       key={category.name}
                       onClick={() => setSelectedCategory(category.name)}
                       className={`px-4 py-2 rounded-lg flex items-center space-x-2 cursor-pointer transition-all
-                        ${selectedCategory === category.name 
-                          ? `bg-gradient-to-r ${category.color} text-white shadow-lg` 
+                        ${selectedCategory === category.name
+                          ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
                           : 'bg-gray-50 hover:bg-gray-100'
                         }`}
                     >
@@ -187,7 +209,7 @@ const Profile = () => {
             </div>
           </div>
         );
-      
+
       case 'orders':
         return (
           <div className="p-8 space-y-6">
@@ -202,9 +224,9 @@ const Profile = () => {
                     <div className="flex items-center space-x-4">
                       <div className="flex -space-x-2">
                         {order.products.map((product, index) => (
-                          <img 
+                          <img
                             key={index}
-                            src={product.image} 
+                            src={product.image}
                             alt={product.name}
                             className="w-10 h-10 rounded-full border-2 border-white"
                           />
@@ -217,11 +239,10 @@ const Profile = () => {
                     </div>
                     <div className="text-right">
                       <p className="font-medium">${order.total}</p>
-                      <span className={`inline-flex px-3 py-1 text-sm rounded-full ${
-                        order.status === 'Delivered' 
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`inline-flex px-3 py-1 text-sm rounded-full ${order.status === 'Delivered'
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'
-                      }`}>
+                        }`}>
                         {order.status}
                       </span>
                     </div>
@@ -255,11 +276,10 @@ const Profile = () => {
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                        activeTab === item.id
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${activeTab === item.id
                           ? 'bg-blue-50 text-blue-600 font-medium'
                           : 'text-gray-600 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <item.icon className="w-5 h-5" />
                       <span>{item.label}</span>

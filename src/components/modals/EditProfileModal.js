@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiX } from 'react-icons/fi';
+import SummaryApi from '../../common';
+import { colgroup } from 'framer-motion/client';
 
 const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const [formData, setFormData] = useState({
@@ -18,7 +20,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     onSave(formData);
     onClose();
@@ -101,8 +103,8 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
               type="tel"
               name="mobile"
               value={formData.mobile}
-              disabled
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg "
               placeholder="Enter your mobile number"
             />
           </div>
