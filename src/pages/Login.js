@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import SummaryApi from '../common';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../redux/slices/authSlice';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -48,6 +49,44 @@ const Login = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(SummaryApi.googleSignIn.url, {
+        method: SummaryApi.googleSignIn.method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: credentialResponse.credential,
+        }),
+        credentials: 'include',
+      });
+
+      const apiData = await response.json();
+
+      if (apiData.status) {
+        toast.success('Welcome back!');
+        dispatch(setUser({
+          user: apiData.data,
+          token: apiData.token
+        }));
+        localStorage.setItem('token__data', apiData.token);
+        navigate('/');
+      } else {
+        toast.error(apiData.message || 'Google login failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred during Google sign in. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google sign in was unsuccessful. Please try again.');
   };
 
   const containerVariants = {
@@ -201,15 +240,21 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="flex justify-center">
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center justify-center p-3 rounded-full border-2 border-gray-300 shadow-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
-              >
-                <FaGoogle className="h-5 w-5 text-red-500" />
-              </motion.button>
+            {/* Google Sign In Button */}
+            <div className="mt-4">
+              <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    theme="outline"
+                    size="large"
+                    text="continue_with"
+                    shape="rectangular"
+                    width="100%"
+                  />
+                </div>
+              </GoogleOAuthProvider>
             </div>
 
             {/* Sign Up Link */}

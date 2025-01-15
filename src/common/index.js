@@ -9,6 +9,10 @@ const SummaryApi = {
         url : `${backendDomin}/api/user/login`,
         method : "post"
     },
+    googleSignIn : {
+        url : `${backendDomin}/api/user/google_auth`,
+        method : "post"
+    },
     resetPasswordSendMail : {
         url : `${backendDomin}/api/user/reset_password_mail`,
         method : "post"

@@ -7,6 +7,7 @@ import imageTobase64 from '../helpers/imageTobase64';
 import SummaryApi from '../common';
 import Loader from '../components/loader/loader';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaMapMarkerAlt, FaCamera, FaTruck, FaHome, FaLeaf } from 'react-icons/fa';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -45,6 +46,36 @@ const SignUp = () => {
     } else {
       toast.error(result.message);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await fetch(SummaryApi.googleSignIn.url, {
+        method: SummaryApi.googleSignIn.method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: credentialResponse.credential,
+        }),
+        credentials: 'include',
+      });
+
+      const result = await response.json();
+
+      if (result.status) {
+        toast.success('Successfully signed up with Google!');
+        navigate('/');
+      } else {
+        toast.error(result.message || 'Google sign up failed');
+      }
+    } catch (error) {
+      toast.error('An error occurred during Google sign up. Please try again.');
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google sign up was unsuccessful. Please try again.');
   };
 
   return (
@@ -251,10 +282,48 @@ const SignUp = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg text-lg font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-green-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.01] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? <Loader /> : "Create Account"}
+                {isSubmitting ? <Loader /> : 'Create Account'}
               </button>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+                </div>
+              </div>
+
+              {/* Google Sign Up Button */}
+              <div className="mt-4">
+                <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                  <div className="flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      theme="outline"
+                      size="large"
+                      text="signup_with"
+                      shape="rectangular"
+                      width="100%"
+                    />
+                  </div>
+                </GoogleOAuthProvider>
+              </div>
+
+              {/* Login Link */}
+              <p className="text-center text-sm text-gray-600">
+                Already have an account?{' '}
+                <Link
+                  to="/login"
+                  className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
             </form>
 
             <div className="mt-8 space-y-4">
@@ -269,17 +338,6 @@ const SignUp = () => {
                   Join here
                 </Link>
               </div>
-
-              {/* Login Link */}
-              <p className="text-center text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
-                >
-                  Sign in
-                </Link>
-              </p>
             </div>
           </div>
         </div>
