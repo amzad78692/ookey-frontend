@@ -5,18 +5,19 @@ import { logout, selectUser, selectIsLoggedIn } from '../redux/slices/authSlice'
 import { toast } from 'react-toastify';
 import logo from '../assest/logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FaUserCircle, 
-  FaSignOutAlt, 
-  FaShoppingCart, 
-  FaHome, 
-  FaBuilding, 
-  FaCarrot, 
-  FaSearch, 
+import {
+  FaUserCircle,
+  FaSignOutAlt,
+  FaShoppingCart,
+  FaHome,
+  FaBuilding,
+  FaCarrot,
+  FaSearch,
   FaHeart,
   FaBars,
   FaTimes
 } from 'react-icons/fa';
+import SummaryApi from '../common';
 
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -29,8 +30,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log('User Data:', JSON.stringify(user, null, 2));
-  console.log('Is Logged In:', isLoggedIn);
+  // JSON.stringify(user, null, 2);
+  console.log(user)
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -45,8 +46,14 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
     dispatch(logout());
+    const urlWithQuery = `${SummaryApi.logout_user.url}`; // Append query parameter
+
+    const dataResponse = await fetch(urlWithQuery, {
+      method: SummaryApi.logout_user.method, // Ensure this is compatible with sending queries (e.g., GET or POST)
+      credentials: 'include', // Send cookies with the request
+    });
     setIsProfileOpen(false);
     toast.success('Successfully logged out!');
     navigate('/');
@@ -60,18 +67,17 @@ const Navbar = () => {
   const navLinks = [
     { path: '/', icon: <FaHome className="h-4 w-4" />, label: 'Home' },
     { path: '/real-estate', icon: <FaBuilding className="h-4 w-4" />, label: 'Properties' },
-    { 
-      path: '/product-category?category=vegetables', 
-      icon: <FaCarrot className="h-4 w-4" />, 
+    {
+      path: '/product-category?category=vegetables',
+      icon: <FaCarrot className="h-4 w-4" />,
       label: 'Fresh Produce',
       isGreen: true
     }
   ];
 
   return (
-    <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white/80 backdrop-blur-md shadow-lg' : 'bg-white shadow-md'
-    }`}>
+    <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-lg' : 'bg-white shadow-md'
+      }`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
@@ -85,13 +91,12 @@ const Navbar = () => {
               <React.Fragment key={link.path}>
                 <Link
                   to={link.path}
-                  className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 ${
-                    isActive(link.path)
+                  className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 ${isActive(link.path)
                       ? link.isGreen
                         ? 'bg-green-50 text-green-600'
                         : 'bg-blue-50 text-blue-600'
                       : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {link.icon}
                   <span>{link.label}</span>
@@ -135,7 +140,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                       <FaUserCircle className="h-6 w-6 text-blue-600" />
                     </div>
-                    <span className="hidden md:block text-gray-700">{user?.first_name  || 'User'}</span>
+                    <span className="hidden md:block text-gray-700">{user?.first_name || 'User'}</span>
                   </button>
 
                   <AnimatePresence>
@@ -147,7 +152,7 @@ const Navbar = () => {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100"
                       >
                         <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">{user?.firstName || user?.name}</p>
+                          <p className="text-sm font-medium text-gray-900">{user?.first_name || user?.last_name}</p>
                           <p className="text-xs text-gray-500">{user?.email}</p>
                         </div>
                         <Link
@@ -164,7 +169,7 @@ const Navbar = () => {
                         >
                           My Orders
                         </Link>
-                        {user?.role === 'admin' && (
+                        {user?.role === 1 && (
                           <Link
                             to="/admin"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
@@ -224,13 +229,12 @@ const Navbar = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`block px-4 py-2 rounded-lg flex items-center space-x-3 transition-all duration-200 ${
-                    isActive(link.path)
+                  className={`block px-4 py-2 rounded-lg flex items-center space-x-3 transition-all duration-200 ${isActive(link.path)
                       ? link.isGreen
                         ? 'bg-green-50 text-green-600'
                         : 'bg-blue-50 text-blue-600'
                       : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {link.icon}
                   <span className="font-medium">{link.label}</span>
@@ -285,7 +289,7 @@ const Navbar = () => {
                   Search
                 </button>
               </div>
-              
+
               <div className="mt-4">
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Popular Searches:</h3>
                 <div className="flex flex-wrap gap-2">

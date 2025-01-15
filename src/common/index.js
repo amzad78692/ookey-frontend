@@ -30,8 +30,8 @@ const SummaryApi = {
         method : "get"
     },
     logout_user : {
-        url : `${backendDomin}/api/userLogout`,
-        method : 'get'
+        url : `${backendDomin}/api/session/delete`,
+        method : 'delete'
     },
     allUser : {
         url : `${backendDomin}/api/all-user`,

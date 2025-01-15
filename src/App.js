@@ -35,7 +35,10 @@ const App = () => {
       console.log('User Details API Response:', dataApi);
 
       if (dataApi.status) {
-        dispatch(setUser(dataApi.data));
+        dispatch(setUser({
+          user: dataApi.data,
+          token: dataApi.token
+        }));
       } else {
         console.error('Error fetching user details:', dataApi.message);
       }
