@@ -29,6 +29,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log(user)
+  console.log(isLoggedIn)
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {

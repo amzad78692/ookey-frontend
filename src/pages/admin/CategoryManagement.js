@@ -3,8 +3,11 @@ import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import SummaryApi from '../../common';
+import { useSelector } from 'react-redux';
+import {selectUser,selectToken} from "../../redux/slices/authSlice.js"
 
 const CategoryManagement = () => {
+  const token = useSelector(selectToken);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
@@ -35,6 +38,7 @@ const CategoryManagement = () => {
   };
 
   useEffect(() => {
+
     fetchCategories();
   }, []);
 
@@ -87,18 +91,23 @@ const CategoryManagement = () => {
       }),
     });
 
+    const uploadedImageUrl = await image_url.json()
+
+    // console.log(uploadedImageUrl.image_url)
     setLoading(true);
     try {
+      console.log(data)
       const response = await fetch(SummaryApi.addCategory.url, {
         method: SummaryApi.addCategory.method,
         headers: {
           'Content-Type': 'application/json',
+           "Authorization": `Bearer ${token}`
         },
         credentials: 'include',
         body: JSON.stringify({
-          name: data.title,
+          title: data.title,
           description: data.description,
-          image: image_url
+          image: uploadedImageUrl.image_url
         }),
       });
 
@@ -190,7 +199,7 @@ const CategoryManagement = () => {
                     Category Name
                   </label>
                   <input
-                    {...register('name', { required: 'Category name is required' })}
+                    {...register('title', { required: 'Category name is required' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Enter category name"
                   />

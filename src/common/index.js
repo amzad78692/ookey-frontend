@@ -22,11 +22,11 @@ const SummaryApi = {
         method : "post"
     },
     addCategory : {
-        url : `${backendDomin}/api/user/upload`,
+        url : `${backendDomin}/api/category/add`,
         method : "post"
     },
     current_user : {
-        url : `${backendDomin}/api/user-details`,
+        url : `${backendDomin}/api/session/get`,
         method : "get"
     },
     logout_user : {

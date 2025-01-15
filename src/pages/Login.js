@@ -5,12 +5,15 @@ import { FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import SummaryApi from '../common';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../redux/slices/authSlice';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -24,13 +27,14 @@ const Login = () => {
           email: data.email,
           password: data.password,
         }),
-        // credentials: 'include',
+        credentials: 'include',
       });
 
       const apiData = await response.json();
 
       if (apiData.status) {
         toast.success('Welcome back!');
+        dispatch(setUser(apiData.data));
         localStorage.setItem('token__data',apiData.token)
         navigate('/');
       } else {
