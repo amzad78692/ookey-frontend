@@ -29,8 +29,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(user)
-  console.log(isLoggedIn)
+  console.log('User Data:', JSON.stringify(user, null, 2));
+  console.log('Is Logged In:', isLoggedIn);
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -135,7 +135,7 @@ const Navbar = () => {
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                       <FaUserCircle className="h-6 w-6 text-blue-600" />
                     </div>
-                    <span className="hidden md:block text-gray-700">{user?.name || 'User'}</span>
+                    <span className="hidden md:block text-gray-700">{user?.first_name  || 'User'}</span>
                   </button>
 
                   <AnimatePresence>
@@ -147,7 +147,7 @@ const Navbar = () => {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100"
                       >
                         <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                          <p className="text-sm font-medium text-gray-900">{user?.firstName || user?.name}</p>
                           <p className="text-xs text-gray-500">{user?.email}</p>
                         </div>
                         <Link

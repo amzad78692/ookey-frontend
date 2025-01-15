@@ -34,7 +34,10 @@ const Login = () => {
 
       if (apiData.status) {
         toast.success('Welcome back!');
-        dispatch(setUser(apiData.data));
+        dispatch(setUser({
+          user: apiData.data,
+          token: apiData.token
+        }));
         localStorage.setItem('token__data',apiData.token)
         navigate('/');
       } else {
