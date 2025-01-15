@@ -37,7 +37,7 @@ const App = () => {
       if (dataApi.status) {
         dispatch(setUser({
           user: dataApi.data,
-          token: dataApi.token
+          token: localStorage.getItem('token__data')
         }));
       } else {
         console.error('Error fetching user details:', dataApi.message);

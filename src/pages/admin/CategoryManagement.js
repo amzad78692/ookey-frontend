@@ -16,6 +16,7 @@ const CategoryManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+
   const {
     register,
     handleSubmit,
@@ -172,7 +173,7 @@ const CategoryManagement = () => {
     }
 
     try {
-      const response = await fetch(`${SummaryApi.updateCategory.url}/${selectedCategory._id}`, {
+      const response = await fetch(`${SummaryApi.updateCategory.url}`, {
         method: SummaryApi.updateCategory.method,
         headers: {
           'Content-Type': 'application/json',
@@ -180,11 +181,13 @@ const CategoryManagement = () => {
         },
         credentials: 'include',
         body: JSON.stringify({
+          id: selectedCategory._id,
           title: data.title,
           description: data.description,
           image: updatedImageUrl
         }),
       });
+
 
       const result = await response.json();
       if (result.status) {
@@ -208,7 +211,7 @@ const CategoryManagement = () => {
   const confirmDelete = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${SummaryApi.deleteCategory.url}/${selectedCategory._id}`, {
+      const response = await fetch(`${SummaryApi.deleteCategory.url}?id=${selectedCategory._id}`, {
         method: SummaryApi.deleteCategory.method,
         headers: {
           'Content-Type': 'application/json',
@@ -216,6 +219,7 @@ const CategoryManagement = () => {
         },
         credentials: 'include'
       });
+
 
       const result = await response.json();
       if (result.status) {
@@ -275,7 +279,7 @@ const CategoryManagement = () => {
                   </p>
                 </div>
                 <div className="flex justify-end gap-3 mt-auto">
-                  <button 
+                  <button
                     onClick={() => handleEdit(category)}
                     className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors duration-200 tooltip-trigger"
                     title="Edit Category"
@@ -284,7 +288,7 @@ const CategoryManagement = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(category)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors duration-200 tooltip-trigger"
                     title="Delete Category"

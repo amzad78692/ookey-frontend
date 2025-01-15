@@ -1,66 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import SummaryApi from '../common';
 
 const CategorySection = () => {
-  const categories = [
-    {
-      id: 1,
-      name: 'Real Estate',
-      description: 'Find your perfect home with our extensive collection of premium properties',
-      image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60',
-      color: 'from-blue-500/80 to-indigo-600/80'
-    },
-    {
-      id: 2,
-      name: 'Vegetables',
-      description: 'Fresh, organic vegetables sourced directly from local farmers',
-      image: 'https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=800&auto=format&fit=crop&q=60',
-      color: 'from-green-500/80 to-emerald-600/80'
-    },
-    {
-      id: 3,
-      name: 'Fruits',
-      description: 'Seasonal and exotic fruits from around the world',
-      image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=800&auto=format&fit=crop&q=60',
-      color: 'from-red-500/80 to-rose-600/80'
-    },
-    {
-      id: 4,
-      name: 'Footwear',
-      description: 'Step out in style with our premium footwear collection',
-      image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&auto=format&fit=crop&q=60',
-      color: 'from-purple-500/80 to-violet-600/80'
-    },
-    {
-      id: 5,
-      name: 'Fashion Wears',
-      description: 'Latest fashion trends for every style and occasion',
-      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&auto=format&fit=crop&q=60',
-      color: 'from-pink-500/80 to-fuchsia-600/80'
-    },
-    {
-      id: 6,
-      name: 'Electronics',
-      description: 'Cutting-edge electronics and smart devices',
-      image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&auto=format&fit=crop&q=60',
-      color: 'from-yellow-500/80 to-amber-600/80'
-    },
-    {
-      id: 7,
-      name: 'Essential Products',
-      description: 'Quality everyday essentials for your daily needs',
-      image: 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800&auto=format&fit=crop&q=60',
-      color: 'from-orange-500/80 to-amber-600/80'
-    },
-    {
-      id: 8,
-      name: 'B2B Business',
-      description: 'Comprehensive solutions for business growth',
-      image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60',
-      color: 'from-indigo-500/80 to-violet-600/80'
+  const [categories,setCategories] = useState([])
+
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(SummaryApi.getCategories.url, {
+        method: SummaryApi.getCategories.method,
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.status) {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch categories');
     }
-  ];
+  };
+
+  useEffect(() => {
+
+    fetchCategories();
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -110,7 +76,7 @@ const CategorySection = () => {
               whileHover={{ y: -8 }}
               className="group relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
-              <Link to={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}>
+              <Link to={`/category/${category.title.toLowerCase().replace(/\s+/g, '-')}`}>
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <img
                     src={category.image}
@@ -124,7 +90,7 @@ const CategorySection = () => {
                     <motion.h3 
                       className="text-2xl font-bold text-white mb-2 transform group-hover:translate-y-0 transition-transform duration-300"
                     >
-                      {category.name}
+                      {category.title}
                     </motion.h3>
                     <p className="text-gray-200 text-sm transform group-hover:translate-y-0 transition-transform duration-300">
                       {category.description}

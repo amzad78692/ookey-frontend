@@ -29,6 +29,14 @@ const SummaryApi = {
         url : `${backendDomin}/api/category/get`,
         method : "get"
     },
+    updateCategory : {
+        url : `${backendDomin}/api/category/update`,
+        method : "put"
+    },
+    deleteCategory : {
+        url : `${backendDomin}/api/category/delete`,
+        method : "delete"
+    },
     current_user : {
         url : `${backendDomin}/api/session/get`,
         method : "get"
