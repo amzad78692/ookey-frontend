@@ -4,6 +4,7 @@ import { FiHome, FiShoppingBag, FiUsers, FiFileText, FiMenu, FiX } from 'react-i
 import { BsBuilding } from 'react-icons/bs';
 import { TbCategoryPlus } from "react-icons/tb";
 import { HiOutlineDocumentReport } from 'react-icons/hi';
+import { MdCategory } from "react-icons/md";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -12,6 +13,7 @@ const DashboardLayout = () => {
   const menuItems = [
     { path: '/admin', icon: <FiHome className="w-5 h-5" />, title: 'Overview' },
     { path: '/admin/category', icon: <TbCategoryPlus className="w-5 h-5" />, title: 'Add New Category' },
+    { path: '/admin/sub-category', icon: <MdCategory className="w-5 h-5" />, title: 'Add New Sub Category' },
     { path: '/admin/products', icon: <FiShoppingBag className="w-5 h-5" />, title: 'Products' },
     { path: '/admin/real-estate', icon: <BsBuilding className="w-5 h-5" />, title: 'Real Estate' },
     { path: '/admin/users', icon: <FiUsers className="w-5 h-5" />, title: 'Users' },

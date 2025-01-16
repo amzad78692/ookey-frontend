@@ -28,6 +28,7 @@ import OrderManagement from '../pages/admin/OrderManagement'
 import Reports from '../pages/admin/Reports'
 import ContactUs from '../pages/ContactUs'
 import CategoryManagement from '../pages/admin/CategoryManagement'
+import SubcategoryPage from '../components/SubcategoryPage'
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
           {
             path: 'category',
             element: <CategoryManagement />
+          },
+          {
+            path: 'sub-category',
+            element: <SubcategoryPage />
           },
           {
             path: 'products',
