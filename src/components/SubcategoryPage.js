@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaTimes } from 'react-icons/fa';
 import { toast } from "react-toastify";
 import SummaryApi from "../common";
 import { selectToken } from "../redux/slices/authSlice";
@@ -139,142 +139,195 @@ const SubcategoryPage = () => {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 min-h-screen">
-      <div className="flex justify-between">
-        <h1 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">Subcategories</h1>
-        <div className="mb-4 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+          <div className="mb-4 md:mb-0">
+            <h1 className="text-4xl font-bold text-gray-800 tracking-tight">
+              Subcategories
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Manage and organize your subcategories
+            </p>
+          </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition duration-300"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            Add New Subcategory
+            <FaPlus className="w-4 h-4" />
+            <span>Add New Subcategory</span>
           </button>
+        </div>
+
+        {/* Table Section */}
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-gradient-to-r from-indigo-600 to-purple-600">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">#</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Title</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Description</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Image</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white">Category Name</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-white">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {subcategories.map((subcategory, index) => (
+                  <tr 
+                    key={subcategory._id} 
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">{index + 1}</td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{subcategory.title}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600">{subcategory.description}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <img
+                        src={subcategory.image}
+                        alt={subcategory.title}
+                        className="w-16 h-16 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-600">{subcategory.category_id}</div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => handleDelete(subcategory._id)}
+                        className="inline-flex items-center justify-center p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors duration-200"
+                        title="Delete"
+                      >
+                        <FaTrash className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">Add New Subcategory</h2>
-            <form onSubmit={handleFormSubmit}>
-              <div className="mb-4">
-                <label htmlFor="category_id" className="block text-gray-700">Category</label>
-                <select
-                  id="category_id"
-                  name="category_id"
-                  value={newSubcategory.category_id}
-                  onChange={handleFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(category => (
-                    <option key={category._id} value={category._id}>{category.title}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="title" className="block text-gray-700">Title</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={newSubcategory.title}
-                  onChange={handleFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-gray-700">Description</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={newSubcategory.description}
-                  onChange={handleFormChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="image" className="block text-gray-700">Image</label>
-                <input
-                  type="file"
-                  id="image"
-                  name="image"
-                  onChange={handleImageChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-                {newSubcategory.image && (
-                  <img
-                    src={newSubcategory.image}
-                    alt="Uploaded preview"
-                    className="mt-4 w-32 h-32 object-cover rounded-lg"
-                  />
-                )}
-              </div>
-
-              <div className="flex justify-between">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <div className="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Add New Subcategory
+                </h3>
                 <button
-                  type="button"
                   onClick={() => setShowModal(false)}
-                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
+                  className="text-gray-400 hover:text-gray-500 transition-colors duration-200"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                >
-                  Save
+                  <FaTimes className="w-5 h-5" />
                 </button>
               </div>
-            </form>
+              
+              <form onSubmit={handleFormSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="category_id" className="block text-sm font-medium text-gray-700">
+                    Category
+                  </label>
+                  <select
+                    id="category_id"
+                    name="category_id"
+                    value={newSubcategory.category_id}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map(category => (
+                      <option key={category._id} value={category._id}>{category.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={newSubcategory.title}
+                    onChange={handleFormChange}
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={newSubcategory.description}
+                    onChange={handleFormChange}
+                    rows="3"
+                    className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+                    Image
+                  </label>
+                  <div className="mt-1 flex items-center">
+                    <input
+                      type="file"
+                      id="image"
+                      name="image"
+                      onChange={handleImageChange}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    />
+                  </div>
+                  {newSubcategory.image && (
+                    <div className="mt-2">
+                      <img
+                        src={newSubcategory.image}
+                        alt="Preview"
+                        className="h-32 w-32 object-cover rounded-lg shadow-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm hover:shadow transition-all duration-200"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
-
-      <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
-        <table className="min-w-full table-auto border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-              <th className="border border-gray-200 px-6 py-3 text-left font-medium">#</th>
-              <th className="border border-gray-200 px-6 py-3 text-left font-medium">Title</th>
-              <th className="border border-gray-200 px-6 py-3 text-left font-medium">Description</th>
-              <th className="border border-gray-200 px-6 py-3 text-left font-medium">Image</th>
-              <th className="border border-gray-200 px-6 py-3 text-left font-medium">Category Name</th>
-              <th className="border border-gray-200 px-6 py-3 text-left font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subcategories.map((subcategory, index) => (
-              <tr key={subcategory._id} className="hover:bg-gray-100 transition duration-300">
-                <td className="border border-gray-200 px-6 py-4 text-gray-700 text-center">{index + 1}</td>
-                <td className="border border-gray-200 px-6 py-4 text-gray-700">{subcategory.title}</td>
-                <td className="border border-gray-200 px-6 py-4 text-gray-700">{subcategory.description}</td>
-                <td className="border border-gray-200 px-6 py-4 text-center">
-                  <img
-                    src={subcategory.image}
-                    alt={subcategory.title}
-                    className="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                  />
-                </td>
-                <td className="border border-gray-200 px-6 py-4 text-gray-700">{subcategory.category_id}</td>
-                <td className="border border-gray-200 px-6 py-4 flex justify-center items-center space-x-4">
-                  <FaTrash
-                    onClick={() => handleDelete(subcategory._id)}
-                    className="text-red-600 text-xl cursor-pointer hover:text-red-800 transition duration-300"
-                    title="Delete"
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 };
