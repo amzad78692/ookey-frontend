@@ -77,8 +77,8 @@ const SummaryApi = {
         url : `${backendDomin}/api/product/add`,
         method : 'post'
     },
-    allProduct : {
-        url : `${backendDomin}/api/get-product`,
+    getProducts : {
+        url : `${backendDomin}/api/product/get`,
         method : 'get'
     },
     DeleteProduct : {

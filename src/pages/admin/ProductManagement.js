@@ -2,31 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import SummaryApi from '../../common';
+import { useSelector } from 'react-redux';
+import { selectUser, selectToken } from "../../redux/slices/authSlice.js"
 
 const ProductManagement = () => {
   const [categories, setCategories] = useState([])
+  const [products, setProducts] = useState([])
+  const token = useSelector(selectToken);
   const [subCategories, setsubCategories] = useState([])
   const [filteredSubCategory, setFilteredSubCategory] = useState([])
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: 'Fresh Apples',
-      category: 'Fruits',
-      price: 2.99,
-      stock: 150,
-      image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6',
-      description: 'Fresh and crispy apples from local farms'
-    },
-    {
-      id: 2,
-      name: 'Organic Carrots',
-      category: 'Vegetables',
-      price: 1.99,
-      stock: 200,
-      image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37',
-      description: 'Organic carrots perfect for salads and cooking'
-    },
-  ]);
 
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -53,7 +37,7 @@ const ProductManagement = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingProduct) {
       // Update existing product
@@ -65,9 +49,23 @@ const ProductManagement = () => {
       toast.success('Product updated successfully!');
     } else {
       // Add new product
-      console.log(formData)
-      setProducts(prev => [...prev, { ...formData, id: Date.now() }]);
-      toast.success('Product added successfully!');
+      const response = await fetch(SummaryApi.addProduct.url, {
+        method: SummaryApi.addProduct.method,
+        headers: {
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${token}`
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...formData
+        }),
+      });
+      if (response.status) {
+        toast.success('Product added successfully');
+        fetchProducts();
+      } else {
+        toast.error(response.message || 'Failed to add category');
+      }
     }
     handleCloseModal();
   };
@@ -98,6 +96,20 @@ const ProductManagement = () => {
     });
   };
 
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(SummaryApi.getProducts.url, {
+        method: SummaryApi.getProducts.method,
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.status) {
+        setProducts(data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch categories');
+    }
+  };
   const fetchCategories = async () => {
     try {
       const response = await fetch(SummaryApi.getCategories.url, {
@@ -130,6 +142,7 @@ const ProductManagement = () => {
   useEffect(() => {
     fetchCategories();
     fetchSubCategories();
+    fetchProducts()
   }, []);
 
   return (
@@ -298,17 +311,34 @@ const ProductManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Image URL</label>
+                <label className="block text-sm font-medium text-gray-700">Upload Image</label>
                 <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          image: reader.result, // Base64 string
+                        }));
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
                   className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="Enter image URL"
-                  required
                 />
+                {formData.image && (
+                  <img
+                    src={formData.image}
+                    alt="Preview"
+                    className="mt-4 w-32 h-32 object-cover rounded-lg"
+                  />
+                )}
               </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Description</label>
