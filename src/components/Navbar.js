@@ -30,9 +30,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // JSON.stringify(user, null, 2);
-  console.log(user)
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
