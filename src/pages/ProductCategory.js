@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FaShoppingCart, FaStar } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import SummaryApi from '../common';
 
 const ProductCategory = () => {
   const location = useLocation();
   const { category, searchQuery } = location.state || {};
+  const { categories, setCategories } = useState([]);
 
   // Static product data
   const products = [
@@ -78,6 +81,27 @@ const ProductCategory = () => {
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // const fetchCategories = async () => {
+  //   try {
+  //     console.log('first')
+  //     const response = await fetch(SummaryApi.getCategories.url, {
+  //       method: SummaryApi.getCategories.method,
+  //       credentials: 'include'
+  //     });
+  //     const data = await response.json();
+  //     if (data.status) {
+  //       console.log(data.data)
+  //       setCategories(data.data);
+  //     }
+  //   } catch (error) {
+  //     toast.error('Failed to fetch categories');
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchCategories();
+  // }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">

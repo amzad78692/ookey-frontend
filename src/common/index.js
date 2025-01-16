@@ -73,8 +73,8 @@ const SummaryApi = {
         url : `${backendDomin}/api/user/update`,
         method : "put"
     },
-    uploadProduct : {
-        url : `${backendDomin}/api/upload-product`,
+    addProduct : {
+        url : `${backendDomin}/api/product/add`,
         method : 'post'
     },
     allProduct : {

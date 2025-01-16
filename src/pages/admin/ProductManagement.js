@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import SummaryApi from '../../common';
 
 const ProductManagement = () => {
+  const [categories, setCategories] = useState([])
+  const [subCategories, setsubCategories] = useState([])
+  const [filteredSubCategory, setFilteredSubCategory] = useState([])
   const [products, setProducts] = useState([
     {
       id: 1,
@@ -28,8 +32,10 @@ const ProductManagement = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
+    category_id: '',
+    subcategory_id: '',
     price: '',
+    discount_price: '',
     stock: '',
     image: '',
     description: ''
@@ -37,6 +43,10 @@ const ProductManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (e.target.name === 'category_id') {
+      const constData = subCategories.filter(item => item.category_id === e.target.value)
+      setFilteredSubCategory(constData)
+    }
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -47,14 +57,15 @@ const ProductManagement = () => {
     e.preventDefault();
     if (editingProduct) {
       // Update existing product
-      setProducts(prev => prev.map(product => 
-        product.id === editingProduct.id 
+      setProducts(prev => prev.map(product =>
+        product.id === editingProduct.id
           ? { ...formData, id: product.id }
           : product
       ));
       toast.success('Product updated successfully!');
     } else {
       // Add new product
+      console.log(formData)
       setProducts(prev => [...prev, { ...formData, id: Date.now() }]);
       toast.success('Product added successfully!');
     }
@@ -86,6 +97,40 @@ const ProductManagement = () => {
       description: ''
     });
   };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(SummaryApi.getCategories.url, {
+        method: SummaryApi.getCategories.method,
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.status) {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch categories');
+    }
+  };
+  const fetchSubCategories = async () => {
+    try {
+      const response = await fetch(SummaryApi.getSubCategory.url, {
+        method: SummaryApi.getSubCategory.method,
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (data.status) {
+        setsubCategories(data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch categories');
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchSubCategories();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -157,7 +202,9 @@ const ProductManagement = () => {
               <h3 className="text-lg font-medium">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
               <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">×</button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-lg font-semibold text-gray-800">Product Details</h2>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
@@ -165,36 +212,78 @@ const ProductManagement = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="Enter product name"
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Category</label>
                 <select
-                  name="category"
-                  value={formData.category}
+                  name="category_id"
+                  value={formData.category_id}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   required
                 >
                   <option value="">Select category</option>
-                  <option value="Fruits">Fruits</option>
-                  <option value="Vegetables">Vegetables</option>
+                  {categories.map(category => (
+                    <option key={category._id} value={category._id}>
+                      {category.title}
+                    </option>
+                  ))}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
+                <label className="block text-sm font-medium text-gray-700">Sub Category</label>
+                <select
+                  name="subcategory_id"
+                  value={formData.subcategory_id}
                   onChange={handleInputChange}
-                  step="0.01"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   required
-                />
+                >
+                  <option value="">Select sub category</option>
+                  {filteredSubCategory.map(sub => (
+                    <option key={sub._id} value={sub._id}>
+                      {sub.title}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Price</label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="Enter price"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Discount Price</label>
+                  <input
+                    type="number"
+                    name="discount_price"
+                    value={formData.discount_price}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    placeholder="Enter discount price"
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Stock</label>
                 <input
@@ -202,10 +291,12 @@ const ProductManagement = () => {
                   name="stock"
                   value={formData.stock}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="Enter stock quantity"
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Image URL</label>
                 <input
@@ -213,37 +304,42 @@ const ProductManagement = () => {
                   name="image"
                   value={formData.image}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="Enter image URL"
                   required
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  rows="3"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  rows="4"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  placeholder="Enter product description"
                   required
                 ></textarea>
               </div>
-              <div className="flex justify-end space-x-3">
+
+              <div className="flex justify-end space-x-4">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 hover:bg-gray-300 rounded-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg"
                 >
                   {editingProduct ? 'Update' : 'Add'} Product
                 </button>
               </div>
             </form>
+
           </div>
         </div>
       )}

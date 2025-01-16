@@ -195,7 +195,7 @@ const SubcategoryPage = () => {
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">{subcategory.category_id}</div>
+                      <div className="text-sm text-gray-600">{categories.filter(item=>item._id===subcategory.category_id)[0].title}</div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button
