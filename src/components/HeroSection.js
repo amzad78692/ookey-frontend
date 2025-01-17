@@ -186,7 +186,7 @@ const HeroSection = () => {
                   {activeCategory === 'realestate' && (
                     <div className="mt-2 flex justify-between items-center">
                       <span className="text-sm text-gray-600">Premium Villa</span>
-                      <span className="text-blue-600 font-semibold">$850,000</span>
+                      <span className="text-blue-600 font-semibold">₹850,000</span>
                     </div>
                   )}
                 </div>
@@ -199,7 +199,7 @@ const HeroSection = () => {
                   {activeCategory === 'realestate' && (
                     <div className="mt-2 flex justify-between items-center">
                       <span className="text-sm text-gray-600">Modern Apartment</span>
-                      <span className="text-blue-600 font-semibold">$420,000</span>
+                      <span className="text-blue-600 font-semibold">₹420,000</span>
                     </div>
                   )}
                 </div>
@@ -214,7 +214,7 @@ const HeroSection = () => {
                   {activeCategory === 'realestate' && (
                     <div className="mt-2 flex justify-between items-center">
                       <span className="text-sm text-gray-600">Luxury Condo</span>
-                      <span className="text-blue-600 font-semibold">$650,000</span>
+                      <span className="text-blue-600 font-semibold">₹650,000</span>
                     </div>
                   )}
                 </div>
@@ -227,7 +227,7 @@ const HeroSection = () => {
                   {activeCategory === 'realestate' && (
                     <div className="mt-2 flex justify-between items-center">
                       <span className="text-sm text-gray-600">Family Home</span>
-                      <span className="text-blue-600 font-semibold">$550,000</span>
+                      <span className="text-blue-600 font-semibold">₹550,000</span>
                     </div>
                   )}
                 </div>

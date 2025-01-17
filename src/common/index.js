@@ -81,13 +81,13 @@ const SummaryApi = {
         url : `${backendDomin}/api/product/get`,
         method : 'get'
     },
-    DeleteProduct : {
-        url : `${backendDomin}/api/delete-product`,
-        method : 'post'
+    deleteProduct : {
+        url : `${backendDomin}/api/product/delete`,
+        method : 'delete'
     },
     updateProduct : {
-        url : `${backendDomin}/api/update-product`,
-        method  : 'post'
+        url : `${backendDomin}/api/product/update`,
+        method  : 'put'
     },
     categoryProduct : {
         url : `${backendDomin}/api/get-categoryProduct`,
