@@ -93,7 +93,7 @@ const ProductManagement = () => {
         method: SummaryApi.addProduct.method,
         headers: {
           'Content-Type': 'application/json',
-          "Authorization": `Bearer ₹{token}`
+          "Authorization": `Bearer ${token}`
         },
         credentials: 'include',
         body: JSON.stringify({

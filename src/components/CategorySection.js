@@ -76,7 +76,7 @@ const CategorySection = () => {
               whileHover={{ y: -8 }}
               className="group relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500"
             >
-              <Link to={`/category/${category.title.toLowerCase().replace(/\s+/g, '-')}`}>
+              <Link to={`/category/${category._id}`}>
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <img
                     src={category.image}
