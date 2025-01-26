@@ -1,252 +1,280 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import SummaryApi from '../common'
-import { FaStar, FaStarHalf } from "react-icons/fa";
-import displayINRCurrency from '../helpers/displayCurrency';
-import VerticalCardProduct from '../components/VerticalCardProduct';
-import CategroyWiseProductDisplay from '../components/CategoryWiseProductDisplay';
-import addToCart from '../helpers/addToCart';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import {
+  FaStar,
+  FaHeart,
+  FaShare,
+  FaShoppingCart,
+  FaTruck,
+  FaShieldAlt,
+  FaExchangeAlt,
+  FaMinus,
+  FaPlus,
+  FaRegHeart,
+} from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import SummaryApi from '../common';
 import Context from '../context';
 import Loader from '../components/loader/loader';
-import { toast } from 'react-toastify';
+import displayINRCurrency from '../helpers/displayCurrency';
 
 const ProductDetails = () => {
-  const [data, setData] = useState({
-    productName: "",
-    brandName: "",
-    category: "",
-    productImage: [],
-    description: "",
-    price: "",
-    sellingPrice: ""
-  });
-  
-  const params = useParams();
-  const [loading, setLoading] = useState(true);
-  const [loader, setLoader] = useState(false);
-  const [Id, setId] = useState("");
-  const productImageListLoading = new Array(4).fill(null);
-  const [activeImage, setActiveImage] = useState("");
+  const { id } = useParams();
   const navigate = useNavigate();
-
-  const [zoomImageCoordinate, setZoomImageCoordinate] = useState({
-    x: 0,
-    y: 0
-  });
-  const [zoomImage, setZoomImage] = useState(false);
-
+  const dispatch = useDispatch();
   const { fetchUserAddToCart } = useContext(Context);
 
-  const fetchProductDetails = async () => {
-    setLoading(true);
+  // States
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [relatedProducts, setRelatedProducts] = useState([]);
+
+  // Fetch product details
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(SummaryApi.productDetails.url, {
+          method: SummaryApi.productDetails.method,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ productId: id })
+        });
+
+        console.log(response)
+
+        if (!response.ok) throw new Error('Failed to fetch product details');
+
+        const data = await response.json();
+        if (data?.status) {
+          setProduct(data.data);
+          setSelectedImage(0);
+        } else {
+          toast.error(data?.message || 'Failed to load product details');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('Error loading product details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchProductDetails();
+  }, [id]);
+
+  // Handle image zoom
+  const handleMouseMove = (e) => {
+    if (!isZoomed) return;
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPosition({ x, y });
+  };
+
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    if (!product) return;
+    
     try {
-      const response = await fetch(SummaryApi.productDetails.url, {
-        method: SummaryApi.productDetails.method,
-        headers: {
-          "content-type": "application/json"
-        },
+      const response = await fetch(SummaryApi.addToCart.url, {
+        method: SummaryApi.addToCart.method,
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
-          productId: params?.id
+          productId: product._id,
+          quantity: quantity
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch product details');
-      }
-
-      const dataResponse = await response.json();
-
-      if (dataResponse?.status) {
-        setData(dataResponse?.data);
-        setActiveImage(dataResponse?.data?.productImage[0]);
+      const data = await response.json();
+      
+      if (data.status) {
+        toast.success('Added to cart successfully');
+        fetchUserAddToCart();
       } else {
-        toast.error(dataResponse?.message || 'Failed to load product details');
+        toast.error(data.message || 'Failed to add to cart');
       }
     } catch (error) {
-      console.error('Error fetching product details:', error);
-      toast.error('Error loading product details');
-    } finally {
-      setLoading(false);
+      toast.error('Error adding to cart');
     }
   };
 
-  useEffect(() => {
-    if (params?.id) {
-      fetchProductDetails();
-    }
-  }, [params]);
-
-  const handleMouseEnterProduct = (imageURL) => {
-    setActiveImage(imageURL);
+  // Handle buy now
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate('/checkout');
   };
 
-  const handleZoomImage = useCallback((e) => {
-    setZoomImage(true);
-    const { left, top, width, height } = e.target.getBoundingClientRect();
-
-    const x = (e.clientX - left) / width;
-    const y = (e.clientY - top) / height;
-
-    setZoomImageCoordinate({
-      x,
-      y
-    });
-  }, []);
-
-  const handleLeaveImageZoom = () => {
-    setZoomImage(false);
-  };
-
-  const handleAddToCart = async (e, id) => {
-    setId(id);
-    setLoader(true);
-    await addToCart(e, id);
-    fetchUserAddToCart();
-    setLoader(false);
-    setId("");
-  };
-
-  const handleBuyProduct = async (e, id) => {
-    await addToCart(e, id);
-    fetchUserAddToCart();
-    navigate("/cart");
-  };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="min-h-[200px] flex flex-col lg:flex-row gap-4 animate-pulse">
-          <div className="h-96 flex flex-col lg:flex-row-reverse gap-4">
-            <div className="h-[300px] w-[300px] lg:h-96 lg:w-96 bg-slate-200"></div>
-            <div className="flex gap-2 lg:flex-col">
-              {productImageListLoading.map((_, index) => (
-                <div key={index} className="h-20 w-20 bg-slate-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-          <div className="flex-1 space-y-4">
-            <div className="h-8 bg-slate-200 rounded w-1/4"></div>
-            <div className="h-12 bg-slate-200 rounded w-3/4"></div>
-            <div className="h-6 bg-slate-200 rounded w-1/2"></div>
-            <div className="h-24 bg-slate-200 rounded"></div>
-            <div className="flex gap-4">
-              <div className="h-12 bg-slate-200 rounded w-1/3"></div>
-              <div className="h-12 bg-slate-200 rounded w-1/3"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Loader />;
+  if (!product) return <div className="text-center py-10">Product not found</div>;
 
   return (
-    <div className='container mx-auto p-4'>
-      <div className='min-h-[200px] flex flex-col lg:flex-row gap-4'>
-        {/* Product Image */}
-        <div className='h-96 flex flex-col lg:flex-row-reverse gap-4'>
-          <div className='h-[300px] w-[300px] lg:h-96 lg:w-96 bg-slate-200 relative p-2'>
-            <img 
-              src={activeImage} 
-              alt={data.productName}
-              className='h-full w-full object-scale-down mix-blend-multiply' 
-              onMouseMove={handleZoomImage} 
-              onMouseLeave={handleLeaveImageZoom}
+    <div className="container mx-auto px-4 py-8">
+      {/* Product Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left: Image Gallery */}
+        <div className="space-y-4">
+          {/* Main Image with Zoom */}
+          <div 
+            className="relative overflow-hidden aspect-square rounded-lg bg-gray-100"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setIsZoomed(true)}
+            onMouseLeave={() => setIsZoomed(false)}
+          >
+            <img
+              src={product.productImage[selectedImage]}
+              alt={product.productName}
+              className={`w-full h-full object-cover transition-transform duration-200 ${
+                isZoomed ? 'scale-150' : 'scale-100'
+              }`}
+              style={{
+                transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
+              }}
             />
-            {/* Product zoom */}
-            {zoomImage && (
-              <div className='hidden lg:block absolute min-w-[500px] overflow-hidden min-h-[400px] bg-slate-200 p-1 -right-[510px] top-0'>
-                <div
-                  className='w-full h-full min-h-[400px] min-w-[500px] mix-blend-multiply scale-150'
-                  style={{
-                    background: `url(${activeImage})`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: `${zoomImageCoordinate.x * 100}% ${zoomImageCoordinate.y * 100}%`
-                  }}
-                ></div>
-              </div>
-            )}
           </div>
 
-          <div className='h-full'>
-            <div className='flex gap-2 lg:flex-col overflow-scroll scrollbar-none h-full'>
-              {data?.productImage?.map((imgURL, index) => (
-                <div 
-                  className='h-20 w-20 bg-slate-200 rounded p-1' 
-                  key={imgURL}
-                >
-                  <img 
-                    src={imgURL} 
-                    alt={`${data.productName} view ${index + 1}`}
-                    className='w-full h-full object-scale-down mix-blend-multiply cursor-pointer' 
-                    onMouseEnter={() => handleMouseEnterProduct(imgURL)}
-                    onClick={() => handleMouseEnterProduct(imgURL)}
-                  />
-                </div>
-              ))}
-            </div>
+          {/* Thumbnail Images */}
+          <div className="grid grid-cols-4 gap-2">
+            {product.productImage.map((image, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedImage(index)}
+                className={`aspect-square rounded-md overflow-hidden ${
+                  selectedImage === index ? 'ring-2 ring-blue-500' : ''
+                }`}
+              >
+                <img
+                  src={image}
+                  alt={`Product view ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Product details */}
-        <div className='flex flex-col gap-1'>
-          <p className='bg-red-200 text-red-600 px-2 rounded-full inline-block w-fit'>
-            {data?.brandName}
-          </p>
-          <h2 className='text-2xl lg:text-4xl font-medium'>{data?.productName}</h2>
-          <p className='capitalize text-slate-400'>{data?.category}</p>
-
-          <div className='text-red-600 flex items-center gap-1'>
-            <FaStar />
-            <FaStar />
-            <FaStar />
-            <FaStar />
-            <FaStarHalf />
-            <span className='text-slate-600 text-sm'>(4.5)</span>
+        {/* Right: Product Info */}
+        <div className="space-y-6">
+          {/* Basic Info */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">{product.productName}</h1>
+            <p className="text-lg text-gray-600 mt-2">{product.brandName}</p>
           </div>
 
-          <div className='flex items-center gap-2 text-2xl lg:text-3xl font-medium my-1'>
-            <p className='text-red-600'>
-              {displayINRCurrency(data?.sellingPrice || data?.price)}
+          {/* Price */}
+          <div className="flex items-baseline space-x-4">
+            <p className="text-3xl font-bold text-gray-900">
+              {displayINRCurrency(product.sellingPrice)}
             </p>
-            {data?.sellingPrice && (
-              <p className='text-slate-400 line-through'>
-                {displayINRCurrency(data?.price)}
-              </p>
+            {product.price !== product.sellingPrice && (
+              <>
+                <p className="text-lg text-gray-500 line-through">
+                  {displayINRCurrency(product.price)}
+                </p>
+                <p className="text-lg font-semibold text-green-600">
+                  {Math.round(((product.price - product.sellingPrice) / product.price) * 100)}% OFF
+                </p>
+              </>
             )}
           </div>
 
-          <div className='flex items-center gap-3 my-2'>
+          {/* Quantity Selector */}
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-700">Quantity:</span>
+            <div className="flex items-center border rounded-lg">
+              <button
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                className="p-2 hover:bg-gray-100"
+              >
+                <FaMinus />
+              </button>
+              <span className="px-4 py-2 border-x">{quantity}</span>
+              <button
+                onClick={() => setQuantity(quantity + 1)}
+                className="p-2 hover:bg-gray-100"
+              >
+                <FaPlus />
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-4">
             <button
-              className='bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600'
-              onClick={(e) => handleAddToCart(e, data?._id)}
-              disabled={loader && Id === data?._id}
+              onClick={handleAddToCart}
+              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
             >
-              {loader && Id === data?._id ? (
-                <Loader color="white" size={20} />
-              ) : (
-                'Add to Cart'
-              )}
+              <FaShoppingCart />
+              <span>Add to Cart</span>
             </button>
             <button
-              className='bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-600'
-              onClick={(e) => handleBuyProduct(e, data?._id)}
+              onClick={handleBuyNow}
+              className="flex-1 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
             >
               Buy Now
             </button>
           </div>
 
-          <div>
-            <p className='text-slate-600 font-medium my-1'>Description:</p>
-            <p className='text-slate-500'>{data?.description}</p>
+          {/* Additional Actions */}
+          <div className="flex space-x-4">
+            <button
+              onClick={() => setIsWishlisted(!isWishlisted)}
+              className="flex items-center space-x-2 text-gray-600 hover:text-red-500"
+            >
+              {isWishlisted ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
+              <span>Wishlist</span>
+            </button>
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: product.productName,
+                    text: product.description,
+                    url: window.location.href,
+                  });
+                }
+              }}
+              className="flex items-center space-x-2 text-gray-600 hover:text-blue-500"
+            >
+              <FaShare />
+              <span>Share</span>
+            </button>
+          </div>
+
+          {/* Product Features */}
+          <div className="border-t pt-6 space-y-4">
+            <h3 className="text-lg font-semibold">Highlights</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-3 text-gray-600">
+                <FaTruck className="text-blue-500" />
+                <span>Free Delivery</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-600">
+                <FaShieldAlt className="text-blue-500" />
+                <span>1 Year Warranty</span>
+              </div>
+              <div className="flex items-center space-x-3 text-gray-600">
+                <FaExchangeAlt className="text-blue-500" />
+                <span>7 Days Replacement</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Description */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4">Description</h3>
+            <p className="text-gray-600 whitespace-pre-line">{product.description}</p>
           </div>
         </div>
       </div>
-
-      {/* Similar Products */}
-      <section className='my-8'>
-        <h3 className='text-2xl font-medium mb-4'>Similar Products</h3>
-        <CategroyWiseProductDisplay />
-      </section>
     </div>
   );
 };
