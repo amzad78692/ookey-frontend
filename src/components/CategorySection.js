@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import SummaryApi from '../common';
+import { addCategory } from '../redux/slices/categorySlice';
+import { useDispatch } from 'react-redux';
 
 const CategorySection = () => {
   const [categories,setCategories] = useState([])
+  const dispatch = useDispatch()
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -16,6 +19,7 @@ const CategorySection = () => {
       });
       const data = await response.json();
       if (data.status) {
+        dispatch(addCategory(data.data))
         setCategories(data.data);
       }
     } catch (error) {

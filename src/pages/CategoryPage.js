@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link,useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaStar, FaFilter, FaSort, FaSpinner, FaHeart, FaShare, FaMapMarkerAlt } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch } from 'react-redux';
 import SummaryApi from '../common';
+import { useSelector } from 'react-redux';
 
 const CategoryPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const [categoryList, setCategoryList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,18 +17,7 @@ const CategoryPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
 
-  const categories = [
-    { value: 'all', label: 'All Categories' },
-    { value: 'real-estate', label: 'Real Estate' },
-    { value: 'vegetable', label: 'Vegetable' },
-    { value: 'fruits', label: 'Fruits' },
-    { value: 'shoes', label: 'Shoes' },
-    { value: 'clothes', label: 'Clothes' },
-    { value: 'electronics', label: 'Electronics' },
-    { value: 'essential', label: 'Essential Products' },
-    { value: 'b2b', label: 'B2B Business' },
-  ];
-
+  const categories = useSelector((state) => state.category);
   useEffect(() => {
     const fetchCategoryData = async () => {
       try {
@@ -40,8 +31,10 @@ const CategoryPage = () => {
           },
         });
 
+        
         const data = await response.json();
-        const categoryWiseData = data.data.filter(product=>product.category_id===id)
+        console.log(id,data)
+        const categoryWiseData = data.data.filter(product => product.category_id === id)
         setCategoryList(categoryWiseData || []);
       } catch (err) {
         setError(err.message);
@@ -82,6 +75,7 @@ const CategoryPage = () => {
 
   const filteredItems = categoryList.filter(item => selectedCategory === 'all' ? true : item.category === selectedCategory);
   const sortedItems = sortItems(filteredItems);
+  console.log(sortedItems)
 
   if (loading) {
     return (
@@ -106,7 +100,7 @@ const CategoryPage = () => {
       <div className="relative mt-16 overflow-hidden">
         {/* Background with gradient and pattern */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-700">
-          <div className="absolute inset-0 opacity-20" 
+          <div className="absolute inset-0 opacity-20"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
             }}
@@ -123,7 +117,7 @@ const CategoryPage = () => {
                 transition={{ duration: 0.6 }}
                 className="max-w-4xl mx-auto text-center"
               >
-                <motion.h1 
+                <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
@@ -131,7 +125,7 @@ const CategoryPage = () => {
                 >
                   Discover Our <span className="text-yellow-300">Premium</span> Collection
                 </motion.h1>
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
@@ -168,20 +162,28 @@ const CategoryPage = () => {
                 </select>
               </div>
 
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <FaFilter className="mr-2 text-blue-500" />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={(e) => {
+                    const categoryId = e.target.value;
+                    setSelectedCategory(categoryId);
+                    navigate(`/category/${categoryId}`); // Redirect to the selected category
+                  }}
                   className="border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
                 >
-                  {categories.map(category => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {Array.isArray(categories[0]) &&
+                    categories[0].map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.title}
+                      </option>
+                    ))}
                 </select>
-              </div>
+              </div> */}
 
               <div className="flex-grow md:text-right">
                 <span className="text-gray-500">
@@ -206,7 +208,7 @@ const CategoryPage = () => {
                 {/* Product Image Placeholder with Gradient */}
                 <div className="h-56 bg-gradient-to-br from-gray-100 to-gray-200 relative">
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300" />
-                  
+
                   {/* Action Buttons */}
                   <div className="absolute top-4 right-4 flex gap-2 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                     <motion.button
@@ -225,7 +227,7 @@ const CategoryPage = () => {
                       <FaHeart className="text-gray-600 text-sm" />
                     </motion.button>
                   </div>
-                  
+
                   {/* Stock Badge */}
                   <div className="absolute bottom-4 left-4">
                     {item.stock < 10 ? (
@@ -251,7 +253,7 @@ const CategoryPage = () => {
                       {item.description}
                     </p>
                   </div>
-                  
+
                   {/* Price Section */}
                   <div className="mb-4">
                     <div className="flex items-baseline gap-2 mb-1">

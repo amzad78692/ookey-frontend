@@ -15,7 +15,9 @@ import {
   FaSearch,
   FaHeart,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaChevronDown,
+  FaStore
 } from 'react-icons/fa';
 import SummaryApi from '../common';
 
@@ -24,11 +26,15 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const user = useSelector(selectUser);
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const categories = useSelector((state) => state.category);
+
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,7 +49,7 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     dispatch(logout());
     const urlWithQuery = `${SummaryApi.logout_user.url}`; // Append query parameter
 
@@ -89,10 +95,10 @@ const Navbar = () => {
                 <Link
                   to={link.path}
                   className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 ${isActive(link.path)
-                      ? link.isGreen
-                        ? 'bg-green-50 text-green-600'
-                        : 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:bg-gray-50'
+                    ? link.isGreen
+                      ? 'bg-green-50 text-green-600'
+                      : 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:bg-gray-50'
                     }`}
                 >
                   {link.icon}
@@ -101,6 +107,52 @@ const Navbar = () => {
                 {index === 1 && <div className="h-6 w-px bg-gray-200 my-auto"></div>}
               </React.Fragment>
             ))}
+
+            {/* Products Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
+                onMouseEnter={() => setIsProductsDropdownOpen(true)}
+                className={`px-4 py-2 rounded-full flex items-center space-x-2 transition-all duration-200 ${isProductsDropdownOpen ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+              >
+                <FaStore className="h-4 w-4" />
+                <span>All Products</span>
+                <FaChevronDown className={`h-3 w-3 transition-transform duration-200 ${isProductsDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isProductsDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                    className="absolute left-0 mt-2 w-56 rounded-xl bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                  >
+                    <div className="py-2">
+                      {Array.isArray(categories[0]) ? (
+                        categories[0].map((category) => (
+                          <Link
+                            key={category._id}
+                            to={`/category/${category._id}`}
+                            className="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
+                            onClick={() => setIsProductsDropdownOpen(false)}
+                          >
+                            <FaStore className="mr-3 h-4 w-4" />
+                            {category.title}
+                          </Link>
+                        ))
+                      ) : (
+                        <p className="text-gray-500 px-4 py-3">No categories available</p>
+                      )}
+                    </div>
+
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Right Side Icons */}
@@ -209,50 +261,61 @@ const Navbar = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white border-t border-gray-100 shadow-lg"
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: 'tween' }}
+            className="fixed inset-0 z-50 lg:hidden"
           >
-            <div className="container mx-auto px-4 py-4 space-y-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={`block px-4 py-2 rounded-lg flex items-center space-x-3 transition-all duration-200 ${isActive(link.path)
-                      ? link.isGreen
-                        ? 'bg-green-50 text-green-600'
-                        : 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:bg-gray-50'
-                    }`}
-                >
-                  {link.icon}
-                  <span className="font-medium">{link.label}</span>
-                </Link>
-              ))}
+            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
 
-              <div className="border-t border-gray-100 pt-4">
-                <Link
-                  to="/cart"
-                  className="block px-4 py-2 rounded-lg flex items-center space-x-3 text-gray-600 hover:bg-gray-50 transition-all duration-200"
-                >
-                  <FaShoppingCart className="h-5 w-5" />
-                  <span className="font-medium">Cart</span>
-                </Link>
-              </div>
-
-              {/* Mobile Sign In */}
-              {!isLoggedIn && (
-                <div className="pt-2">
-                  <Link
-                    to="/login"
-                    className="block w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 text-center font-medium"
+            <motion.div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl">
+              <div className="flex flex-col h-full overflow-y-auto">
+                <div className="p-4">
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 float-right"
                   >
-                    Sign In
-                  </Link>
+                    <FaTimes className="h-6 w-6" />
+                  </button>
                 </div>
-              )}
-            </div>
+
+                <div className="px-4 py-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className="flex items-center space-x-2 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {link.icon}
+                      <span>{link.label}</span>
+                    </Link>
+                  ))}
+
+                  {/* Mobile Products Menu */}
+                  <div className="mt-2">
+                    <div className="px-4 py-2 text-sm font-semibold text-gray-400">Products Categories</div>
+                    {Array.isArray(categories[0]) ? (
+                      categories[0].map((category) => (
+                        <Link
+                          key={category._id}
+                          to={`/category/${category._id}`}
+                          className="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
+                          onClick={() => setIsProductsDropdownOpen(false)}
+                        >
+                          <FaStore className="mr-3 h-4 w-4" />
+                          {category.title}
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 px-4 py-3">No categories available</p>
+                    )}
+
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
