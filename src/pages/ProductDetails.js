@@ -38,17 +38,19 @@ const ProductDetails = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   // Fetch product details
+  console.log('first', id)
   useEffect(() => {
     const fetchProductDetails = async () => {
+      console.log('first2', id);
       setLoading(true);
       try {
-        const response = await fetch(SummaryApi.productDetails.url, {
-          method: SummaryApi.productDetails.method,
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ productId: id })
+        const url = `${SummaryApi.getProducts.url}?id=${id}`; // Add id as query parameter
+        const response = await fetch(url, {
+          method: SummaryApi.getProducts.method,
+          headers: { "content-type": "application/json" }
         });
 
-        console.log(response)
+        console.log(response);
 
         if (!response.ok) throw new Error('Failed to fetch product details');
 
@@ -70,6 +72,7 @@ const ProductDetails = () => {
     if (id) fetchProductDetails();
   }, [id]);
 
+
   // Handle image zoom
   const handleMouseMove = (e) => {
     if (!isZoomed) return;
@@ -82,7 +85,7 @@ const ProductDetails = () => {
   // Handle add to cart
   const handleAddToCart = async () => {
     if (!product) return;
-    
+
     try {
       const response = await fetch(SummaryApi.addToCart.url, {
         method: SummaryApi.addToCart.method,
@@ -95,7 +98,7 @@ const ProductDetails = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.status) {
         toast.success('Added to cart successfully');
         fetchUserAddToCart();
@@ -123,7 +126,7 @@ const ProductDetails = () => {
         {/* Left: Image Gallery */}
         <div className="space-y-4">
           {/* Main Image with Zoom */}
-          <div 
+          <div
             className="relative overflow-hidden aspect-square rounded-lg bg-gray-100"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsZoomed(true)}
@@ -132,9 +135,8 @@ const ProductDetails = () => {
             <img
               src={product.productImage[selectedImage]}
               alt={product.productName}
-              className={`w-full h-full object-cover transition-transform duration-200 ${
-                isZoomed ? 'scale-150' : 'scale-100'
-              }`}
+              className={`w-full h-full object-cover transition-transform duration-200 ${isZoomed ? 'scale-150' : 'scale-100'
+                }`}
               style={{
                 transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
               }}
@@ -147,9 +149,8 @@ const ProductDetails = () => {
               <button
                 key={index}
                 onClick={() => setSelectedImage(index)}
-                className={`aspect-square rounded-md overflow-hidden ${
-                  selectedImage === index ? 'ring-2 ring-blue-500' : ''
-                }`}
+                className={`aspect-square rounded-md overflow-hidden ${selectedImage === index ? 'ring-2 ring-blue-500' : ''
+                  }`}
               >
                 <img
                   src={image}
