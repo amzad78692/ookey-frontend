@@ -86,35 +86,51 @@ const CategoryManagement = () => {
     }
 
     setLoading(true);
-    const image_url = await fetch(SummaryApi.uploadImage.url, {
-      method: SummaryApi.uploadImage.method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        image: imagePreview
-      }),
-    });
 
-    const uploadedImageUrl = await image_url.json()
-
-    // console.log(uploadedImageUrl.image_url)
     try {
-      const response = await fetch(SummaryApi.addCategory.url, {
+      // Upload Image
+      const imageResponse = await fetch(SummaryApi.uploadImage.url, {
+        method: SummaryApi.uploadImage.method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: imagePreview }),
+      });
+
+      if (!imageResponse.ok) {
+        throw new Error('Image upload failed');
+      }
+
+      const uploadedImageData = await imageResponse.json();
+      const uploadedImageUrl = uploadedImageData.image_url;
+
+      if (!uploadedImageUrl) {
+        throw new Error('Invalid image URL received');
+      }
+
+      // Prepare Pincodes as an Array
+      const pincodeArray = data.pincodes
+        ? data.pincodes.split(',').map((p) => p.trim())
+        : [];
+
+      // Create Category
+      const categoryResponse = await fetch(SummaryApi.addCategory.url, {
         method: SummaryApi.addCategory.method,
         headers: {
           'Content-Type': 'application/json',
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         credentials: 'include',
         body: JSON.stringify({
           title: data.title,
           description: data.description,
-          image: uploadedImageUrl.image_url
+          image: uploadedImageUrl,
+          pincodes: pincodeArray, // Added Pincodes
         }),
       });
 
-      const result = await response.json();
+      const result = await categoryResponse.json();
+
       if (result.status) {
         toast.success('Category added successfully');
         fetchCategories();
@@ -122,10 +138,10 @@ const CategoryManagement = () => {
         reset();
         setImagePreview('');
       } else {
-        toast.error(result.message || 'Failed to add category');
+        throw new Error(result.message || 'Failed to add category');
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error(error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -135,7 +151,9 @@ const CategoryManagement = () => {
   const handleEdit = (category) => {
     setSelectedCategory(category);
     setValue('title', category.title);
+    setValue('title', category.title);
     setValue('description', category.description);
+    setValue('pincodes', category.pincodes.join(','));
     setImagePreview(category.image);
     setShowEditModal(true);
   };
@@ -151,18 +169,22 @@ const CategoryManagement = () => {
     setLoading(true);
     let updatedImageUrl = selectedCategory.image;
 
+    // Convert pincode string to an array (handling commas and spaces)
+    const formattedPincodes = data.pincodes
+      ? data.pincodes.split(',').map(pin => pin.trim())
+      : [];
+
     // Upload new image if changed
-    if (imagePreview !== selectedCategory.image) {
+    if (imagePreview && imagePreview !== selectedCategory.image) {
       try {
         const image_url = await fetch(SummaryApi.uploadImage.url, {
           method: SummaryApi.uploadImage.method,
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            image: imagePreview
-          }),
+          body: JSON.stringify({ image: imagePreview }),
         });
+
         const uploadedImage = await image_url.json();
         updatedImageUrl = uploadedImage.image_url;
       } catch (error) {
@@ -173,7 +195,7 @@ const CategoryManagement = () => {
     }
 
     try {
-      const response = await fetch(`${SummaryApi.updateCategory.url}`, {
+      const response = await fetch(SummaryApi.updateCategory.url, {
         method: SummaryApi.updateCategory.method,
         headers: {
           'Content-Type': 'application/json',
@@ -184,12 +206,13 @@ const CategoryManagement = () => {
           id: selectedCategory._id,
           title: data.title,
           description: data.description,
-          image: updatedImageUrl
+          image: updatedImageUrl,
+          pincodes: formattedPincodes,  // Sending pincodes as an array
         }),
       });
 
-
       const result = await response.json();
+
       if (result.status) {
         toast.success('Category updated successfully');
         fetchCategories();
@@ -206,6 +229,7 @@ const CategoryManagement = () => {
       setLoading(false);
     }
   };
+
 
   // Confirm delete
   const confirmDelete = async () => {
@@ -309,7 +333,7 @@ const CategoryManagement = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+              className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Add New Category</h2>
@@ -329,38 +353,39 @@ const CategoryManagement = () => {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category Name</label>
                   <input
                     {...register('title', { required: 'Category name is required' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Enter category name"
                   />
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-                  )}
+                  {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea
                     {...register('description', { required: 'Description is required' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     rows="3"
                     placeholder="Enter category description"
                   />
-                  {errors.description && (
-                    <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-                  )}
+                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+                </div>
+
+                {/* Pincode Input Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Available Pincodes</label>
+                  <input
+                    {...register('pincodes', { required: 'Pincode is required' })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Enter pincodes (comma separated)"
+                  />
+                  {errors.pincodes && <p className="mt-1 text-sm text-red-600">{errors.pincodes.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category Image
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category Image</label>
                   <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
                     <div className="space-y-1 text-center">
                       {imagePreview ? (
@@ -450,7 +475,7 @@ const CategoryManagement = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+                className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto"
               >
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">Edit Category</h2>
@@ -496,6 +521,21 @@ const CategoryManagement = () => {
                     />
                     {errors.description && (
                       <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+                    )}
+                  </div>
+
+                  {/* New Pincode Input Field */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Pincodes (comma-separated)
+                    </label>
+                    <input
+                      {...register('pincodes')}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="Enter pincodes, e.g., 110001, 110002"
+                    />
+                    {errors.pincodes && (
+                      <p className="mt-1 text-sm text-red-600">{errors.pincodes.message}</p>
                     )}
                   </div>
 

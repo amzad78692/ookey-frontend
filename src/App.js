@@ -1,103 +1,121 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Navbar from './components/Navbar';
+import { useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useEffect, useState } from 'react';
+
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import SummaryApi from './common';
 import Context from './context';
-import { useDispatch } from 'react-redux';
 import { setUser } from './redux/slices/authSlice';
-// import { setUserDetails } from './store/userSlice';
-const App = () => {
-  const dispatch = useDispatch()
-  const [cartProductCount, setCartProductCount] = useState(0)
 
+const App = () => {
+  const dispatch = useDispatch();
+  const [cartProductCount, setCartProductCount] = useState(0);
+  const [pincode, setPincode] = useState(null);
+  const [locationAllowed, setLocationAllowed] = useState(false);
+
+  /** Fetch user details */
   const fetchUserDetails = async () => {
     try {
-      const queryKey = 'User'; // Define the key value
-      const urlWithQuery = `${SummaryApi.current_user.url}?key=${encodeURIComponent(queryKey)}`; // Append query parameter
+      const queryKey = 'User';
+      const urlWithQuery = `${SummaryApi.current_user.url}?key=${encodeURIComponent(queryKey)}`;
 
-      const dataResponse = await fetch(urlWithQuery, {
-        method: SummaryApi.current_user.method, // Ensure this is compatible with sending queries (e.g., GET or POST)
-        credentials: 'include', // Send cookies with the request
+      const response = await fetch(urlWithQuery, {
+        method: SummaryApi.current_user.method,
+        credentials: 'include',
       });
 
-      if (!dataResponse.ok) {
-        throw new Error(`HTTP error! status: ${dataResponse.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const dataApi = await dataResponse.json();
-      console.log('User Details API Response:', dataApi);
-
-      if (dataApi.status) {
+      const data = await response.json();
+      if (data.status) {
         dispatch(setUser({
-          user: dataApi.data,
-          token: localStorage.getItem('token__data')
+          user: data.data,
+          token: localStorage.getItem('token__data'),
         }));
-      } else {
-        console.error('Error fetching user details:', dataApi.message);
       }
     } catch (error) {
-      console.error('Fetch failed:', error.message);
+      console.error('Error fetching user details:', error.message);
+    }
+  };
+
+  /** Fetch user cart product count */
+  const fetchUserAddToCart = async () => {
+    try {
+      const response = await fetch(SummaryApi.addToCartProductCount.url, {
+        method: SummaryApi.addToCartProductCount.method,
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      setCartProductCount(data?.data?.count || 0);
+    } catch (error) {
+      console.error('Error fetching cart count:', error.message);
+    }
+  };
+
+  /** Fetch user pincode if location is allowed */
+  const fetchUserPincode = async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://photon.komoot.io/reverse?lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+
+      if (data.features.length > 0) {
+        const pincode = data.features[0].properties.postcode;
+        if (pincode) setPincode(pincode);
+        else console.error("Pincode not found.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch pincode:", error.message);
     }
   };
 
 
-  const fetchUserAddToCart = async () => {
-    const dataResponse = await fetch(SummaryApi.addToCartProductCount.url, {
-      method: SummaryApi.addToCartProductCount.method,
-      credentials: 'include'
-    })
 
-    const dataApi = await dataResponse.json()
-
-    setCartProductCount(dataApi?.data?.count)
-  }
+  /** Check user location */
+  const checkUserLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationAllowed(true);
+          fetchUserPincode(position.coords.latitude, position.coords.longitude);
+        },
+        () => {
+          setLocationAllowed(false); // Location access denied
+        }
+      );
+    }
+  };
 
   useEffect(() => {
-    /**user Details */
-    fetchUserDetails()
-    /**user Details cart product */
-    fetchUserAddToCart()
-
-  }, [])
-  // This goes in your main file (e.g., index.js or App.js)
-
+    fetchUserDetails();
+    checkUserLocation();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       <Context.Provider value={{
-        fetchUserDetails, // user detail fetch 
-        cartProductCount, // current user add to cart product count,
-        fetchUserAddToCart
+        fetchUserDetails,
+        cartProductCount,
+        fetchUserAddToCart,
+        pincode,
       }}>
-        <ToastContainer
-          position='top-center'
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-
-        {/* <Header/> */}
-        <main className='flex-grow pt-6'>
+        <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} />
+        <main className="flex-grow pt-6">
           <Outlet />
         </main>
+        {locationAllowed && pincode && (
+          <p className="text-center text-gray-600 mt-2">📍 Your Pincode: {pincode}</p>
+        )}
       </Context.Provider>
       <Footer />
     </div>
   );
-}
+};
 
 export default App;

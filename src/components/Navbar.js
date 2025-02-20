@@ -186,12 +186,23 @@ const Navbar = () => {
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center space-x-2 px-4 py-2 rounded-full hover:bg-blue-50 transition-all duration-200"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <FaUserCircle className="h-6 w-6 text-blue-600" />
+                    {/* User Avatar */}
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
+                      {user?.image ? (
+                        <img
+                          src={user.image}
+                          alt="User"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FaUserCircle className="h-6 w-6 text-blue-600" />
+                      )}
                     </div>
-                    <span className="hidden md:block text-gray-700">{user?.first_name || 'User'}</span>
+
+                    <span className="hidden md:block text-gray-700">{user?.first_name || "User"}</span>
                   </button>
 
+                  {/* Dropdown Profile Menu */}
                   <AnimatePresence>
                     {isProfileOpen && (
                       <motion.div
@@ -201,7 +212,9 @@ const Navbar = () => {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100"
                       >
                         <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">{user?.first_name || user?.last_name}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {user?.first_name || user?.last_name}
+                          </p>
                           <p className="text-xs text-gray-500">{user?.email}</p>
                         </div>
                         <Link
@@ -241,6 +254,7 @@ const Navbar = () => {
                 </Link>
               )}
             </div>
+
 
             {/* Mobile Menu Button */}
             <button
@@ -312,6 +326,81 @@ const Navbar = () => {
                       <p className="text-gray-500 px-4 py-3">No categories available</p>
                     )}
 
+                  </div>
+                  <div className="hidden sm:block relative">
+                    {isLoggedIn ? (
+                      <div>
+                        <button
+                          onClick={() => setIsProfileOpen(!isProfileOpen)}
+                          className="flex items-center space-x-2 px-4 py-2 rounded-full hover:bg-blue-50 transition-all duration-200"
+                        >
+                          {/* User Avatar */}
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
+                            {user?.image ? (
+                              <img
+                                src={user.image}
+                                alt="User"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <FaUserCircle className="h-6 w-6 text-blue-600" />
+                            )}
+                          </div>
+
+                          <span className="hidden md:block text-gray-700">{user?.first_name || "User"}</span>
+                        </button>
+
+                        {/* Dropdown Profile Menu */}
+                        <AnimatePresence>
+                          {isProfileOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: 10 }}
+                              className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100"
+                            >
+                              <div className="px-4 py-2 border-b border-gray-100">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {user?.first_name || user?.last_name}
+                                </p>
+                                <p className="text-xs text-gray-500">{user?.email}</p>
+                              </div>
+                              <Link
+                                to="/profile"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                                onClick={() => setIsProfileOpen(false)}
+                              >
+                                Profile Settings
+                              </Link>
+                              {user?.role === 1 && (
+                                <Link
+                                  to="/admin"
+                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                                  onClick={() => setIsProfileOpen(false)}
+                                >
+                                  Admin Dashboard
+                                </Link>
+                              )}
+                              <button
+                                onClick={handleLogout}
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center space-x-2"
+                              >
+                                <FaSignOutAlt className="h-4 w-4" />
+                                <span>Sign Out</span>
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      <Link
+                        to="/login"
+                        className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2"
+                      >
+                        <FaUserCircle className="h-5 w-5" />
+                        <span>Sign In</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
