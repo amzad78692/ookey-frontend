@@ -1,5 +1,5 @@
 import React, { useContext, useState, useCallback, useRef } from "react";
-import Logo from "../assest/logo.png";
+import Logo from "../assest/ookey.jpeg";
 import { GrSearch } from "react-icons/gr";
 import { FaRegCircleUser } from "react-icons/fa6";
 import { FaShoppingCart } from "react-icons/fa";

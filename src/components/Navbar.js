@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout, selectUser, selectIsLoggedIn } from '../redux/slices/authSlice';
 import { toast } from 'react-toastify';
-import logo from '../assest/logo.png';
+import logo from '../assest/ookey.jpeg';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaUserCircle,
@@ -281,127 +281,138 @@ const Navbar = () => {
             transition={{ type: 'tween' }}
             className="fixed inset-0 z-50 lg:hidden"
           >
-            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+            {/* Overlay */}
+            <div
+              className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
 
+            {/* Mobile Menu Container */}
             <motion.div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl">
               <div className="flex flex-col h-full overflow-y-auto">
-                <div className="p-4">
+                {/* Close Button */}
+                <div className="p-4 flex justify-end">
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 float-right"
+                    className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors duration-200"
                   >
                     <FaTimes className="h-6 w-6" />
                   </button>
                 </div>
+   
 
-                <div className="px-4 py-2">
+                {/* User Profile Section */}
+                <div className="mt-auto px-4 py-4 border-t border-gray-100">
+                  {isLoggedIn ? (
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="flex items-center space-x-3 w-full px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        {/* User Avatar */}
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
+                          {user?.image ? (
+                            <img
+                              src={user.image}
+                              alt="User"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <FaUserCircle className="h-6 w-6 text-blue-600" />
+                          )}
+                        </div>
+
+                        <span className="text-sm font-medium text-gray-700">
+                          {user?.first_name || "User"}
+                        </span>
+                      </button>
+
+                      {/* Dropdown Profile Menu */}
+                      <AnimatePresence>
+                        {isProfileOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-100"
+                          >
+                            <div className="px-4 py-2 border-b border-gray-100">
+                              <p className="text-sm font-medium text-gray-900">
+                                {user?.first_name || user?.last_name}
+                              </p>
+                              <p className="text-xs text-gray-500">{user?.email}</p>
+                            </div>
+                            <Link
+                              to="/profile"
+                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                              onClick={() => setIsProfileOpen(false)}
+                            >
+                              Profile Settings
+                            </Link>
+                            {user?.role === 1 && (
+                              <Link
+                                to="/admin"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                                onClick={() => setIsProfileOpen(false)}
+                              >
+                                Admin Dashboard
+                              </Link>
+                            )}
+                            <button
+                              onClick={handleLogout}
+                              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200 flex items-center space-x-2"
+                            >
+                              <FaSignOutAlt className="h-4 w-4" />
+                              <span>Sign Out</span>
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <Link
+                      to="/login"
+                      className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                    >
+                      <FaUserCircle className="h-5 w-5" />
+                      <span className="text-sm font-medium">Sign In</span>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Navigation Links */}
+                <div className="px-4 py-2 space-y-2">
                   {navLinks.map((link) => (
                     <Link
                       key={link.path}
                       to={link.path}
-                      className="flex items-center space-x-2 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg"
+                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {link.icon}
-                      <span>{link.label}</span>
+                      <span className="text-sm font-medium">{link.label}</span>
                     </Link>
                   ))}
+                </div>
 
-                  {/* Mobile Products Menu */}
-                  <div className="mt-2">
-                    <div className="px-4 py-2 text-sm font-semibold text-gray-400">Products Categories</div>
-                    {Array.isArray(categories[0]) ? (
-                      categories[0].map((category) => (
-                        <Link
-                          key={category._id}
-                          to={`/category/${category._id}`}
-                          className="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
-                          onClick={() => setIsProductsDropdownOpen(false)}
-                        >
-                          <FaStore className="mr-3 h-4 w-4" />
-                          {category.title}
-                        </Link>
-                      ))
-                    ) : (
-                      <p className="text-gray-500 px-4 py-3">No categories available</p>
-                    )}
-
-                  </div>
-                  <div className="hidden sm:block relative">
-                    {isLoggedIn ? (
-                      <div>
-                        <button
-                          onClick={() => setIsProfileOpen(!isProfileOpen)}
-                          className="flex items-center space-x-2 px-4 py-2 rounded-full hover:bg-blue-50 transition-all duration-200"
-                        >
-                          {/* User Avatar */}
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
-                            {user?.image ? (
-                              <img
-                                src={user.image}
-                                alt="User"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <FaUserCircle className="h-6 w-6 text-blue-600" />
-                            )}
-                          </div>
-
-                          <span className="hidden md:block text-gray-700">{user?.first_name || "User"}</span>
-                        </button>
-
-                        {/* Dropdown Profile Menu */}
-                        <AnimatePresence>
-                          {isProfileOpen && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 10 }}
-                              className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-100"
-                            >
-                              <div className="px-4 py-2 border-b border-gray-100">
-                                <p className="text-sm font-medium text-gray-900">
-                                  {user?.first_name || user?.last_name}
-                                </p>
-                                <p className="text-xs text-gray-500">{user?.email}</p>
-                              </div>
-                              <Link
-                                to="/profile"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
-                                onClick={() => setIsProfileOpen(false)}
-                              >
-                                Profile Settings
-                              </Link>
-                              {user?.role === 1 && (
-                                <Link
-                                  to="/admin"
-                                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
-                                  onClick={() => setIsProfileOpen(false)}
-                                >
-                                  Admin Dashboard
-                                </Link>
-                              )}
-                              <button
-                                onClick={handleLogout}
-                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 flex items-center space-x-2"
-                              >
-                                <FaSignOutAlt className="h-4 w-4" />
-                                <span>Sign Out</span>
-                              </button>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ) : (
+                {/* Products Categories Section */}
+                <div className="mt-4 px-4 py-2">
+                  <div className="text-sm font-semibold text-gray-500 mb-2">Products Categories</div>
+                  {Array.isArray(categories[0]) ? (
+                    categories[0].map((category) => (
                       <Link
-                        to="/login"
-                        className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-all duration-200 flex items-center space-x-2"
+                        key={category._id}
+                        to={`/category/${category._id}`}
+                        className="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors duration-200"
+                        onClick={() => setIsProductsDropdownOpen(false)}
                       >
-                        <FaUserCircle className="h-5 w-5" />
-                        <span>Sign In</span>
+                        <FaStore className="mr-3 h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                        {category.title}
                       </Link>
-                    )}
-                  </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 px-4 py-3 text-sm">No categories available</p>
+                  )}
                 </div>
               </div>
             </motion.div>
