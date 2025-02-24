@@ -29,6 +29,7 @@ import Reports from '../pages/admin/Reports'
 import ContactUs from '../pages/ContactUs'
 import CategoryManagement from '../pages/admin/CategoryManagement'
 import SubcategoryPage from '../components/SubcategoryPage'
+import LocationMessage from '../components/LocationMessage'
 
 const router = createBrowserRouter([
   {
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <Login />
+      },
+      {
+        path: 'not-serving',
+        element: <LocationMessage />
       },
       {
         path: 'sign-up',

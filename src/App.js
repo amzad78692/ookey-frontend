@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,6 +14,7 @@ import { addCategory } from './redux/slices/categorySlice';
 
 const App = () => {
   const dispatch = useDispatch();
+  const Navigate = useNavigate()
   const [cartProductCount, setCartProductCount] = useState(0);
   const [pincode, setPincode] = useState(null);
   const [locationAllowed, setLocationAllowed] = useState(false);
@@ -68,7 +69,7 @@ const App = () => {
 
       if (data.features.length > 0) {
         const pincode = data.features[0].properties.postcode;
-        if (pincode){
+        if (pincode) {
           const urlWithQuery = `${SummaryApi.getCategoriesByPincode.url}?pincode=${pincode}`;
           const response = await fetch(urlWithQuery, {
             method: SummaryApi.getCategoriesByPincode.method,
@@ -76,10 +77,14 @@ const App = () => {
           });
 
           const categoryData = await response.json()
-          dispatch(addCategory(categoryData.data))
-          setPincode(pincode);
+          if (categoryData.status) {
+            dispatch(addCategory(categoryData.data))
+            setPincode(pincode);
+          } else {
+            Navigate('/not-serving')
+          }
 
-        } 
+        }
         else {
           console.error("Pincode not found.");
         }
