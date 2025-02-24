@@ -375,14 +375,20 @@ const CategoryManagement = () => {
 
                 {/* Pincode Input Field */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Available Pincodes</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Available Pincodes
+                  </label>
                   <input
                     {...register('pincodes', { required: 'Pincode is required' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Enter pincodes (comma separated)"
                   />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Note: Enter at least two pincodes separated by a comma (e.g., 110001, 110002).
+                  </p>
                   {errors.pincodes && <p className="mt-1 text-sm text-red-600">{errors.pincodes.message}</p>}
                 </div>
+
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Category Image</label>

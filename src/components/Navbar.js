@@ -33,7 +33,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const categories = useSelector((state) => state.category);
-
+  console.log(categories)
 
 
   useEffect(() => {
@@ -188,13 +188,9 @@ const Navbar = () => {
                   >
                     {/* User Avatar */}
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
-                      {user?.image ? (
-                        <img
-                          src={user.image}
-                          alt="User"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
+                      {user?.image ? <span className="text-blue-600 font-semibold">
+                        {(user?.first_name?.[0] || '') + (user?.last_name?.[0] || '')}
+                      </span> : (
                         <FaUserCircle className="h-6 w-6 text-blue-600" />
                       )}
                     </div>
@@ -299,7 +295,7 @@ const Navbar = () => {
                     <FaTimes className="h-6 w-6" />
                   </button>
                 </div>
-   
+
 
                 {/* User Profile Section */}
                 <div className="mt-auto px-4 py-4 border-t border-gray-100">

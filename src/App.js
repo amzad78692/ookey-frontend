@@ -9,6 +9,8 @@ import Footer from './components/Footer';
 import SummaryApi from './common';
 import Context from './context';
 import { setUser } from './redux/slices/authSlice';
+import { addCategory } from './redux/slices/categorySlice';
+
 
 const App = () => {
   const dispatch = useDispatch();
@@ -66,8 +68,21 @@ const App = () => {
 
       if (data.features.length > 0) {
         const pincode = data.features[0].properties.postcode;
-        if (pincode) setPincode(pincode);
-        else console.error("Pincode not found.");
+        if (pincode){
+          const urlWithQuery = `${SummaryApi.getCategoriesByPincode.url}?pincode=${pincode}`;
+          const response = await fetch(urlWithQuery, {
+            method: SummaryApi.getCategoriesByPincode.method,
+            credentials: 'include',
+          });
+
+          const categoryData = await response.json()
+          dispatch(addCategory(categoryData.data))
+          setPincode(pincode);
+
+        } 
+        else {
+          console.error("Pincode not found.");
+        }
       }
     } catch (error) {
       console.error("Failed to fetch pincode:", error.message);

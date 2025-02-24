@@ -33,6 +33,10 @@ const SummaryApi = {
         url : `${backendDomin}/api/category/get`,
         method : "get"
     },
+    getCategoriesByPincode : {
+        url : `${backendDomin}/api/category/check-category`,
+        method : "get"
+    },
     updateCategory : {
         url : `${backendDomin}/api/category/update`,
         method : "put"
