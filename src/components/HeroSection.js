@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FaSearch, FaArrowRight, FaHome, FaCarrot, FaBed, FaBath, FaRuler } from 'react-icons/fa'
+import {useSelector} from 'react-redux'
+import patternImage from '../assest/pattern2.jpg'
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const category = useSelector((state) => state.category);
+  console.log(category)
   const [activeCategory, setActiveCategory] = useState('realestate')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -65,8 +69,8 @@ const HeroSection = () => {
   return (
     <div className="relative min-h-[600px] bg-gradient-to-r from-slate-50 to-blue-50 overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-repeat" style={{ backgroundImage: "url('/images/pattern.png')" }} />
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0 bg-repeat" style={{ backgroundImage: `url(${patternImage})` }} />
       </div>
 
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">

@@ -33,7 +33,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const categories = useSelector((state) => state.category);
-  console.log(categories)
 
 
   useEffect(() => {
