@@ -5,6 +5,7 @@ import { logout, selectUser, selectIsLoggedIn } from '../redux/slices/authSlice'
 import { toast } from 'react-toastify';
 import logo from '../assest/ookey.jpeg';
 import { motion, AnimatePresence } from 'framer-motion';
+import LocationService from './LocationService';
 import {
   FaUserCircle,
   FaSignOutAlt,
@@ -19,10 +20,12 @@ import {
   FaChevronDown,
   FaStore
 } from 'react-icons/fa';
+import { FaLocationDot } from "react-icons/fa6";
 import SummaryApi from '../common';
 
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -74,7 +77,7 @@ const Navbar = () => {
       icon: <FaCarrot className="h-4 w-4" />,
       label: 'Fresh Produce',
       isGreen: true
-    }
+    },
   ];
 
   return (
@@ -152,6 +155,7 @@ const Navbar = () => {
                 )}
               </AnimatePresence>
             </div>
+
           </div>
 
           {/* Right Side Icons */}
@@ -176,6 +180,15 @@ const Navbar = () => {
             >
               <FaShoppingCart className="h-5 w-5" />
             </Link>
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="hidden sm:flex p-2 text-gray-600 hover:text-green-600 rounded-full hover:bg-green-50 transition-all duration-200"
+            >
+              <FaLocationDot className="h-5 w-5" />
+            </button>
+            {isLocationModalOpen && (
+              <LocationService isOpen={isLocationModalOpen} onClose={() => setIsLocationModalOpen(false)} />
+            )}
 
             {/* Profile Section */}
             <div className="hidden sm:block relative">

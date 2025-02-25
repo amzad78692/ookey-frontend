@@ -4,6 +4,7 @@ const initialState = {
   user: null,
   isLoggedIn: false,
   token: localStorage.getItem('token__data') || null,
+  userLocation: '',
 };
 
 const authSlice = createSlice({
@@ -22,15 +23,19 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
       localStorage.removeItem('token__data');
     },
+    setUserLocation: (state, action) => {
+      state.userLocation = action.payload.userLocation;
+    },
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { setUser, logout, setUserLocation } = authSlice.actions;
 
 // Selectors
 export const selectAuth = (state) => state.auth;
 export const selectUser = (state) => state.auth?.user;
 export const selectIsLoggedIn = (state) => state.auth?.isLoggedIn;
 export const selectToken = (state) => state.auth?.token;
+export const selectLocation = (state) => state.auth?.userLocation;
 
 export default authSlice.reducer;
