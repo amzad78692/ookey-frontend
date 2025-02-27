@@ -5,6 +5,7 @@ const initialState = {
   isLoggedIn: false,
   token: localStorage.getItem('token__data') || null,
   userLocation: '',
+  userPincode: '',
 };
 
 const authSlice = createSlice({
@@ -26,10 +27,13 @@ const authSlice = createSlice({
     setUserLocation: (state, action) => {
       state.userLocation = action.payload.userLocation;
     },
+    setUserPincode: (state, action) => {
+      state.userPincode = action.payload.userPincode;
+    },
   },
 });
 
-export const { setUser, logout, setUserLocation } = authSlice.actions;
+export const { setUser, logout, setUserLocation, setUserPincode } = authSlice.actions;
 
 // Selectors
 export const selectAuth = (state) => state.auth;
@@ -37,5 +41,6 @@ export const selectUser = (state) => state.auth?.user;
 export const selectIsLoggedIn = (state) => state.auth?.isLoggedIn;
 export const selectToken = (state) => state.auth?.token;
 export const selectLocation = (state) => state.auth?.userLocation;
+export const selectPincode = (state) => state.auth?.userPincode;
 
 export default authSlice.reducer;

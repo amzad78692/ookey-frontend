@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -10,10 +10,15 @@ import SummaryApi from './common';
 import Context from './context';
 import { setUser } from './redux/slices/authSlice';
 import { addCategory } from './redux/slices/categorySlice';
+import { setUserPincode } from './redux/slices/authSlice';
+// import { fetchUserCategoryByPincode } from '../utils';
+import fetchCategoryWiseProduct from './helpers/fetchCategoryWiseProduct';
+import { fetchUserCategoryByPincode } from './helpers/utils';
 
 
 const App = () => {
   const dispatch = useDispatch();
+  const userPincode = useSelector(state => state.auth.userPincode)
   const Navigate = useNavigate()
   const [cartProductCount, setCartProductCount] = useState(0);
   const [pincode, setPincode] = useState(null);
@@ -70,20 +75,8 @@ const App = () => {
       if (data.features.length > 0) {
         const pincode = data.features[0].properties.postcode;
         if (pincode) {
-          const urlWithQuery = `${SummaryApi.getCategoriesByPincode.url}?pincode=${pincode}`;
-          const response = await fetch(urlWithQuery, {
-            method: SummaryApi.getCategoriesByPincode.method,
-            credentials: 'include',
-          });
-
-          const categoryData = await response.json()
-          if (categoryData.status) {
-            dispatch(addCategory(categoryData.data))
-            setPincode(pincode);
-          } else {
-            Navigate('/not-serving')
-          }
-
+          setPincode(pincode);
+          dispatch(setUserPincode({ userPincode: pincode }));
         }
         else {
           console.error("Pincode not found.");
@@ -115,6 +108,27 @@ const App = () => {
     fetchUserDetails();
     checkUserLocation();
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (userPincode) { // Ensure userPincode exists before fetching
+        try {
+          const data = await fetchUserCategoryByPincode(userPincode);
+          if (data.status) {
+            dispatch(addCategory(data.data))
+            Navigate('/')
+          } else {
+            Navigate('/not-serving')
+          }
+        } catch (error) {
+          console.error("Error fetching category by pincode:", error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [userPincode]); // Runs when userPincode changes
+
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

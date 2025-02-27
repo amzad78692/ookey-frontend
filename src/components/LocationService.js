@@ -2,14 +2,19 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FaTimes, FaSearchLocation, FaMapMarkerAlt } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import debounce from "lodash.debounce";
+import { useDispatch, useSelector } from "react-redux";
+import { setUserPincode } from "../redux/slices/authSlice";
 
 const LocationService = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch()
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState("");
   const [manualLocation, setManualLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null); // Store selected location
+  const [showSuggestions, setShowSuggestions] = useState(false); // Control dropdown visibility
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -49,6 +54,8 @@ const LocationService = ({ isOpen, onClose }) => {
       );
       const data = await response.json();
       setAddress(data.display_name);
+      setSelectedLocation({ latitude: lat, longitude: lon, address: data.display_name }); // Set selected location
+      return data.address.postcode
     } catch (error) {
       console.error("Error fetching address:", error);
       setError("Error fetching address. Please try again.");
@@ -74,8 +81,10 @@ const LocationService = ({ isOpen, onClose }) => {
 
       if (data.length > 0) {
         setSuggestions(data);
+        setShowSuggestions(true); // Show dropdown when suggestions are available
       } else {
         setError("Location not found. Please try a different search.");
+        setShowSuggestions(false); // Hide dropdown if no suggestions
       }
     } catch (error) {
       console.error("Error fetching manual location:", error);
@@ -95,14 +104,26 @@ const LocationService = ({ isOpen, onClose }) => {
       debouncedSearch(manualLocation);
     } else {
       setSuggestions([]);
+      setShowSuggestions(false); // Hide dropdown if input is empty
     }
   }, [manualLocation, debouncedSearch]);
 
-  const handleSelectLocation = (selected) => {
+  const handleSelectLocation = async(selected) => {
+    const pinCode = await fetchAddress(selected.lat, selected.lon)
+    dispatch(setUserPincode({ userPincode: pinCode }));
     setLocation({ latitude: selected.lat, longitude: selected.lon });
     setAddress(selected.display_name);
-    setSuggestions([]);
-    setManualLocation("");
+    setSelectedLocation({ latitude: selected.lat, longitude: selected.lon, address: selected.display_name }); // Set selected location
+    setShowSuggestions(true); // Keep dropdown visible after selection
+  };
+
+  const handleConfirmLocation = () => {
+    if (selectedLocation) {
+      setShowSuggestions(false); // Hide dropdown after confirmation
+      onClose(); // Close the modal
+    } else {
+      alert("Please select a location first.");
+    }
   };
 
   if (!isOpen) return null;
@@ -119,19 +140,19 @@ const LocationService = ({ isOpen, onClose }) => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
-          className="bg-white bg-opacity-80 backdrop-blur-lg p-6 rounded-2xl shadow-2xl w-[400px] relative border border-gray-300"
+          className="bg-gradient-to-br from-white to-gray-50 backdrop-blur-lg p-8 rounded-3xl shadow-2xl w-[450px] relative border border-gray-200"
         >
           {/* Header */}
-          <div className="flex justify-between items-center border-b pb-2 mb-4">
-            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-              <FaMapMarkerAlt className="mr-2 text-blue-500" /> Select Location
+          <div className="flex justify-between items-center border-b pb-4 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-green-600" /> Select Location
             </h2>
             <button
               onClick={() => {
                 onClose();
                 document.body.style.overflow = "auto"; // Ensure scroll is re-enabled
               }}
-              className="text-gray-600 hover:text-red-500 transition-colors"
+              className="text-gray-500 hover:text-red-600 transition-colors"
             >
               <FaTimes className="h-6 w-6" />
             </button>
@@ -139,56 +160,70 @@ const LocationService = ({ isOpen, onClose }) => {
 
           {/* Location Info */}
           {isLoading ? (
-            <div className="flex justify-center items-center py-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="flex justify-center items-center py-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
             </div>
           ) : (
             <>
               {location ? (
-                <p className="mb-4 text-gray-700 text-center">
-                  <strong>📍 Delieverd Address:</strong> {address}
+                <p className="mb-6 text-gray-700 text-center bg-gray-100 p-4 rounded-xl shadow-sm">
+                  <strong className="text-green-600">📍 Delivered Address:</strong> {address}
                 </p>
               ) : (
-                <p className="mb-4 text-gray-700 text-center">
+                <p className="mb-6 text-gray-700 text-center">
                   Fetching location...
                 </p>
               )}
 
               {/* Error Message */}
               {error && (
-                <p className="text-red-500 text-sm mb-4 text-center">
+                <p className="text-red-500 text-sm mb-4 text-center bg-red-50 p-2 rounded-lg">
                   {error}
                 </p>
               )}
 
               {/* Manual Search */}
-              <div className="relative">
+              <div className="relative mb-6">
                 <input
                   type="text"
-                  className="border border-gray-300 p-3 rounded-lg w-full pl-12 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm"
+                  className="border border-gray-300 p-3 rounded-xl w-full pl-12 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 shadow-sm transition-all"
                   placeholder="Enter location manually"
                   value={manualLocation}
                   onChange={(e) => setManualLocation(e.target.value)}
                 />
-                <FaSearchLocation className="absolute left-4 top-3.5 text-gray-400 text-lg" />
+                <FaSearchLocation className="absolute left-4 top-3.5 text-gray-500 text-lg" />
               </div>
 
               {/* Suggestions List */}
-              {suggestions.length > 0 && (
-                <div className="bg-white mt-2 border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="bg-white mt-2 border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
                   {suggestions.map((place, index) => (
-                    <div
+                    <motion.div
                       key={index}
-                      className="p-3 cursor-pointer hover:bg-gray-200 transition-all"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="p-3 cursor-pointer hover:bg-gray-100 transition-all border-b border-gray-100 last:border-b-0"
                       onClick={() => handleSelectLocation(place)}
                     >
-                      {place.display_name}
-                    </div>
+                      <p className="text-gray-700">{place.display_name}</p>
+                      <p className="text-sm text-gray-500">{place.type}</p>
+                    </motion.div>
                   ))}
                 </div>
               )}
             </>
           )}
+
+          {/* Confirm Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-semibold mt-6 hover:from-green-700 hover:to-green-800 transition-all"
+            onClick={handleConfirmLocation}
+          >
+            Confirm Location
+          </motion.button>
         </motion.div>
       </motion.div>
     </AnimatePresence>
