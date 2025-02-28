@@ -1,36 +1,37 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { FaTimes, FaSearchLocation, FaMapMarkerAlt } from "react-icons/fa";
+import { FaTimes, FaSearchLocation, FaMapMarkerAlt, FaCompass, FaCheck } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import debounce from "lodash.debounce";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserPincode } from "../redux/slices/authSlice";
 
 const LocationService = ({ isOpen, onClose }) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState("");
   const [manualLocation, setManualLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null); // Store selected location
-  const [showSuggestions, setShowSuggestions] = useState(false); // Control dropdown visibility
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isUsingGPS, setIsUsingGPS] = useState(false);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"; // Disable scroll
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "auto"; // Enable scroll
+      document.body.style.overflow = "auto";
     }
-
     return () => {
-      document.body.style.overflow = "auto"; // Cleanup when unmounted
+      document.body.style.overflow = "auto";
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (isOpen && navigator.geolocation) {
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      setIsUsingGPS(true);
       setIsLoading(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -42,8 +43,17 @@ const LocationService = ({ isOpen, onClose }) => {
           console.error("Error fetching location:", error);
           setError("Unable to fetch your location. Please try manually.");
           setIsLoading(false);
+          setIsUsingGPS(false);
         }
       );
+    } else {
+      setError("Geolocation is not supported by your browser.");
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen && navigator.geolocation) {
+      getCurrentLocation();
     }
   }, [isOpen]);
 
@@ -54,11 +64,17 @@ const LocationService = ({ isOpen, onClose }) => {
       );
       const data = await response.json();
       setAddress(data.display_name);
-      setSelectedLocation({ latitude: lat, longitude: lon, address: data.display_name }); // Set selected location
-      return data.address.postcode
+      setSelectedLocation({ 
+        latitude: lat, 
+        longitude: lon, 
+        address: data.display_name 
+      });
+      setIsUsingGPS(false);
+      return data.address.postcode;
     } catch (error) {
       console.error("Error fetching address:", error);
       setError("Error fetching address. Please try again.");
+      setIsUsingGPS(false);
     } finally {
       setIsLoading(false);
     }
@@ -81,10 +97,10 @@ const LocationService = ({ isOpen, onClose }) => {
 
       if (data.length > 0) {
         setSuggestions(data);
-        setShowSuggestions(true); // Show dropdown when suggestions are available
+        setShowSuggestions(true);
       } else {
         setError("Location not found. Please try a different search.");
-        setShowSuggestions(false); // Hide dropdown if no suggestions
+        setShowSuggestions(false);
       }
     } catch (error) {
       console.error("Error fetching manual location:", error);
@@ -104,25 +120,30 @@ const LocationService = ({ isOpen, onClose }) => {
       debouncedSearch(manualLocation);
     } else {
       setSuggestions([]);
-      setShowSuggestions(false); // Hide dropdown if input is empty
+      setShowSuggestions(false);
     }
   }, [manualLocation, debouncedSearch]);
 
-  const handleSelectLocation = async(selected) => {
-    const pinCode = await fetchAddress(selected.lat, selected.lon)
+  const handleSelectLocation = async (selected) => {
+    const pinCode = await fetchAddress(selected.lat, selected.lon);
     dispatch(setUserPincode({ userPincode: pinCode }));
     setLocation({ latitude: selected.lat, longitude: selected.lon });
     setAddress(selected.display_name);
-    setSelectedLocation({ latitude: selected.lat, longitude: selected.lon, address: selected.display_name }); // Set selected location
-    setShowSuggestions(true); // Keep dropdown visible after selection
+    setSelectedLocation({ 
+      latitude: selected.lat, 
+      longitude: selected.lon, 
+      address: selected.display_name 
+    });
+    setShowSuggestions(false);
+    setManualLocation("");
   };
 
   const handleConfirmLocation = () => {
     if (selectedLocation) {
-      setShowSuggestions(false); // Hide dropdown after confirmation
-      onClose(); // Close the modal
+      setShowSuggestions(false);
+      onClose();
     } else {
-      alert("Please select a location first.");
+      setError("Please select a location first.");
     }
   };
 
@@ -134,96 +155,157 @@ const LocationService = ({ isOpen, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-md flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          className="bg-gradient-to-br from-white to-gray-50 backdrop-blur-lg p-8 rounded-3xl shadow-2xl w-[450px] relative border border-gray-200"
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          className="bg-white rounded-3xl shadow-2xl w-full max-w-[500px] relative overflow-hidden"
         >
+          {/* Decorative Top Pattern */}
+          <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-green-50 to-blue-50 opacity-50" />
+
           {/* Header */}
-          <div className="flex justify-between items-center border-b pb-4 mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-              <FaMapMarkerAlt className="mr-2 text-green-600" /> Select Location
-            </h2>
-            <button
-              onClick={() => {
-                onClose();
-                document.body.style.overflow = "auto"; // Ensure scroll is re-enabled
-              }}
-              className="text-gray-500 hover:text-red-600 transition-colors"
-            >
-              <FaTimes className="h-6 w-6" />
-            </button>
+          <div className="relative px-6 pt-6 pb-4 border-b border-gray-100">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Select your location
+              </h2>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <FaTimes className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <p className="text-gray-500 mt-1">For accurate delivery updates</p>
           </div>
 
-          {/* Location Info */}
-          {isLoading ? (
-            <div className="flex justify-center items-center py-6">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-            </div>
-          ) : (
-            <>
-              {location ? (
-                <p className="mb-6 text-gray-700 text-center bg-gray-100 p-4 rounded-xl shadow-sm">
-                  <strong className="text-green-600">📍 Delivered Address:</strong> {address}
-                </p>
-              ) : (
-                <p className="mb-6 text-gray-700 text-center">
-                  Fetching location...
-                </p>
-              )}
-
-              {/* Error Message */}
-              {error && (
-                <p className="text-red-500 text-sm mb-4 text-center bg-red-50 p-2 rounded-lg">
-                  {error}
-                </p>
-              )}
-
-              {/* Manual Search */}
-              <div className="relative mb-6">
-                <input
-                  type="text"
-                  className="border border-gray-300 p-3 rounded-xl w-full pl-12 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 shadow-sm transition-all"
-                  placeholder="Enter location manually"
-                  value={manualLocation}
-                  onChange={(e) => setManualLocation(e.target.value)}
-                />
-                <FaSearchLocation className="absolute left-4 top-3.5 text-gray-500 text-lg" />
+          <div className="p-6">
+            {/* Current Location Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={getCurrentLocation}
+              className="w-full flex items-center justify-between p-4 mb-6 bg-blue-50 rounded-2xl hover:bg-blue-100 transition-colors group"
+              disabled={isUsingGPS}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`p-3 rounded-xl transition-colors ${
+                  isUsingGPS ? 'bg-blue-200' : 'bg-blue-100 group-hover:bg-blue-200'
+                }`}>
+                  <FaCompass className={`h-6 w-6 ${
+                    isUsingGPS ? 'text-blue-600 animate-spin' : 'text-blue-600'
+                  }`} />
+                </div>
+                <div className="text-left">
+                  <p className="font-semibold text-gray-800">
+                    {isUsingGPS ? 'Getting location...' : 'Current Location'}
+                  </p>
+                  <p className="text-sm text-gray-500">Using GPS</p>
+                </div>
               </div>
+              {selectedLocation && !isUsingGPS && (
+                <FaCheck className="h-5 w-5 text-blue-600" />
+              )}
+            </motion.button>
 
-              {/* Suggestions List */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="bg-white mt-2 border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                  {suggestions.map((place, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-3 cursor-pointer hover:bg-gray-100 transition-all border-b border-gray-100 last:border-b-0"
-                      onClick={() => handleSelectLocation(place)}
-                    >
-                      <p className="text-gray-700">{place.display_name}</p>
-                      <p className="text-sm text-gray-500">{place.type}</p>
-                    </motion.div>
-                  ))}
+            {/* Search Box */}
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FaSearchLocation className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all text-gray-800 placeholder-gray-400"
+                placeholder="Search for your location..."
+                value={manualLocation}
+                onChange={(e) => setManualLocation(e.target.value)}
+              />
+              {isLoading && !isUsingGPS && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-green-500 border-t-transparent"></div>
                 </div>
               )}
-            </>
-          )}
+            </div>
 
-          {/* Confirm Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-semibold mt-6 hover:from-green-700 hover:to-green-800 transition-all"
-            onClick={handleConfirmLocation}
-          >
-            Confirm Location
-          </motion.button>
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 mb-4 bg-red-50 rounded-xl border border-red-100"
+              >
+                <p className="text-red-600 text-sm">{error}</p>
+              </motion.div>
+            )}
+
+            {/* Suggestions List */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="mt-2 max-h-[240px] overflow-y-auto rounded-2xl border border-gray-100 shadow-lg divide-y divide-gray-100">
+                {suggestions.map((place, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => handleSelectLocation(place)}
+                    className="flex items-start space-x-3 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                  >
+                    <div className="p-2 bg-gray-100 rounded-xl">
+                      <FaMapMarkerAlt className="h-4 w-4 text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="text-gray-800 font-medium">
+                        {place.display_name.split(',')[0]}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                        {place.display_name.split(',').slice(1).join(',')}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* Selected Location */}
+            {selectedLocation && !showSuggestions && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 p-4 bg-green-50 rounded-2xl border border-green-100"
+              >
+                <div className="flex items-start space-x-3">
+                  <div className="p-2 bg-green-100 rounded-xl">
+                    <FaMapMarkerAlt className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-green-800">Selected Location</p>
+                    <p className="text-sm text-green-600 mt-1">
+                      {selectedLocation.address}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Confirm Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleConfirmLocation}
+              disabled={!selectedLocation || isLoading}
+              className={`w-full mt-6 py-4 px-6 font-semibold rounded-2xl shadow-lg transition-all ${
+                !selectedLocation || isLoading
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-green-200'
+              }`}
+            >
+              {isLoading ? 'Loading...' : 'Confirm Location'}
+            </motion.button>
+          </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
