@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { FaStar, FaShoppingCart, FaHeart } from 'react-icons/fa';
+import { FaStar, FaShoppingCart, FaHeart, FaTag } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -90,7 +90,6 @@ const FeaturedProducts = () => {
       if (data.status) {
         toast.success('Product added to cart!');
         fetchUserAddToCart();
-        // Navigate to product details after adding to cart
         navigate(`/product/${product.id}`);
       } else {
         toast.error(data.message || 'Failed to add product to cart');
@@ -140,78 +139,95 @@ const FeaturedProducts = () => {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          Featured Products
-        </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Discover our handpicked selection of premium products, chosen for their exceptional quality and value.
-        </p>
-      </div>
+    <div className="bg-gradient-to-b from-gray-50 via-white to-blue-50 py-20 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {featuredProducts.map((product) => (
-          <div
-            key={product.id}
-            onClick={() => navigateToProductDetails(product.id)}
-            className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-          >
-            <div className="relative">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute top-0 right-0 m-2 flex gap-2">
-                <button 
-                  className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
-                  onClick={(e) => handleAddToFavorites(e, product)}
-                >
-                  <FaHeart className="text-gray-600 hover:text-red-500" />
-                </button>
-                <button 
-                  className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
-                  onClick={(e) => handleAddToCart(e, product)}
-                >
-                  <FaShoppingCart className="text-gray-600 hover:text-blue-500" />
-                </button>
-              </div>
-              <div className="absolute bottom-0 left-0 m-2">
-                <span className="px-2 py-1 bg-white/90 rounded-full text-sm font-medium text-gray-700">
-                  {product.category}
-                </span>
-              </div>
-            </div>
+      <div className="container mx-auto px-4 relative">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            Featured Products
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Discover our handpicked selection of premium products, chosen for their exceptional quality and value.
+          </p>
+        </div>
 
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                {product.name}
-              </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {featuredProducts.map((product) => (
+            <div
+              key={product.id}
+              onClick={() => navigateToProductDetails(product.id)}
+              className="group bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 border border-gray-100 cursor-pointer"
+            >
+              <div className="relative overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-64 object-cover transform group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80" />
+                
+                {/* Wishlist Button */}
+                <div className="absolute top-4 right-4">
+                  <button 
+                    className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-300 transform hover:scale-110"
+                    onClick={(e) => handleAddToFavorites(e, product)}
+                  >
+                    <FaHeart className="text-gray-600 hover:text-red-500 w-5 h-5" />
+                  </button>
+                </div>
 
-              <div className="flex items-center mb-2">
-                <div className="flex items-center text-yellow-400">
-                  <FaStar />
-                  <span className="ml-1 text-sm text-gray-600">
-                    {product.rating} ({product.reviews} reviews)
+                {/* Category Badge */}
+                <div className="absolute bottom-4 left-4">
+                  <span className="px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-900 flex items-center gap-2 shadow-lg">
+                    <FaTag className="text-blue-500" />
+                    {product.category}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold text-gray-900">
-                  ₹{product.price.toLocaleString('en-IN')}
-                </span>
-                <button 
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={(e) => handleAddToCart(e, product)}
-                >
-                  Add to Cart
-                </button>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  {product.name}
+                </h3>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {product.description}
+                </p>
+
+                <div className="flex items-center mb-4">
+                  <div className="flex items-center text-yellow-400">
+                    <FaStar className="w-5 h-5" />
+                    <span className="ml-2 text-sm font-medium text-gray-700">
+                      {product.rating}
+                    </span>
+                    <span className="ml-1 text-sm text-gray-500">
+                      ({product.reviews} reviews)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-gray-900">
+                    ₹{product.price.toLocaleString('en-IN')}
+                  </span>
+                  <button 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    onClick={(e) => handleAddToCart(e, product)}
+                  >
+                    Add to Cart
+                  </button>
+                </div>
               </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-2xl"></div>
+              <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-gradient-to-tr from-pink-500/20 to-blue-500/20 rounded-full blur-2xl"></div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

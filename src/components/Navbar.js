@@ -49,6 +49,19 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  // Add new useEffect for body scroll lock
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
+
   const handleLogout = async () => {
     dispatch(logout());
     const urlWithQuery = `${SummaryApi.logout_user.url}`;
@@ -77,32 +90,106 @@ const Navbar = () => {
     },
   ];
 
+  // Animation variants for menu items
+  const menuItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        ease: [0.6, -0.05, 0.01, 0.99]
+      }
+    }),
+    exit: { 
+      opacity: 0,
+      x: -20,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+
+  // Animation variants for mobile menu
+  const mobileMenuVariants = {
+    hidden: { x: '100%', opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        mass: 1,
+        staggerChildren: 0.07,
+        delayChildren: 0.2
+      }
+    },
+    exit: {
+      x: '100%',
+      opacity: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        mass: 1
+      }
+    }
+  };
+
+  // Quick action button hover animation
+  const quickActionVariants = {
+    hover: { 
+      scale: 1.1,
+      rotate: 5,
+      transition: { 
+        type: "spring",
+        stiffness: 400,
+        damping: 10
+      }
+    }
+  };
+
   return (
-    <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+    <nav className={`fixed w-full top-0 z-50 transition-all duration-500 ${
       isScrolled 
         ? 'bg-white/90 backdrop-blur-md shadow-lg' 
         : 'bg-white shadow-sm'
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 z-50 group">
-            <img 
-              src={logo} 
-              width={80} 
-              height={80} 
-              className="rounded-full transform transition-transform duration-300 group-hover:scale-105 shadow-md" 
-              alt="Logo" 
-            />
-          </Link>
+          {/* Logo with enhanced animation */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <Link to="/" className="flex items-center space-x-2 z-50">
+              <img 
+                src={logo} 
+                width={80} 
+                height={80} 
+                className="rounded-full shadow-md" 
+                alt="Logo" 
+              />
+            </Link>
+          </motion.div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation with enhanced animations */}
           <div className="hidden lg:flex space-x-2">
             {navLinks.map((link, index) => (
-              <React.Fragment key={link.path}>
+              <motion.div
+                key={link.path}
+                custom={index}
+                variants={menuItemVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
                 <Link
                   to={link.path}
-                  className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 transform hover:scale-105 ${
+                  className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 ${
                     isActive(link.path)
                       ? link.isGreen
                         ? 'bg-green-50 text-green-600 shadow-sm shadow-green-100'
@@ -110,19 +197,25 @@ const Navbar = () => {
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  {link.icon}
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {link.icon}
+                  </motion.div>
                   <span className="font-medium">{link.label}</span>
                 </Link>
-                {index === 1 && <div className="h-6 w-px bg-gray-200 my-auto mx-2"></div>}
-              </React.Fragment>
+              </motion.div>
             ))}
 
-            {/* Products Dropdown */}
+            {/* Products Dropdown with enhanced animations */}
             <div className="relative">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
                 onMouseEnter={() => setIsProductsDropdownOpen(true)}
-                className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 transform hover:scale-105 ${
+                className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 ${
                   isProductsDropdownOpen 
                     ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-100' 
                     : 'text-gray-600 hover:bg-gray-50'
@@ -130,33 +223,49 @@ const Navbar = () => {
               >
                 <FaStore className="h-4 w-4" />
                 <span className="font-medium">All Products</span>
-                <FaChevronDown className={`h-3 w-3 transition-transform duration-300 ${
-                  isProductsDropdownOpen ? 'rotate-180' : ''
-                }`} />
-              </button>
+                <motion.div
+                  animate={{ rotate: isProductsDropdownOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <FaChevronDown className="h-3 w-3" />
+                </motion.div>
+              </motion.button>
 
               <AnimatePresence>
                 {isProductsDropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                     onMouseLeave={() => setIsProductsDropdownOpen(false)}
                     className="absolute left-0 mt-2 w-56 rounded-xl bg-white shadow-xl ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden"
                   >
                     <div className="py-2">
                       {Array.isArray(categories[0]) ? (
-                        categories[0].map((category) => (
-                          <Link
+                        categories[0].map((category, index) => (
+                          <motion.div
                             key={category._id}
-                            to={`/category/${category._id}`}
-                            className="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
-                            onClick={() => setIsProductsDropdownOpen(false)}
+                            variants={menuItemVariants}
+                            custom={index}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
                           >
-                            <FaStore className="mr-3 h-4 w-4 transition-colors duration-200" />
-                            <span className="font-medium">{category.title}</span>
-                          </Link>
+                            <Link
+                              to={`/category/${category._id}`}
+                              className="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
+                              onClick={() => setIsProductsDropdownOpen(false)}
+                            >
+                              <motion.div
+                                whileHover={{ rotate: 360 }}
+                                transition={{ duration: 0.5 }}
+                              >
+                                <FaStore className="mr-3 h-4 w-4" />
+                              </motion.div>
+                              <span className="font-medium">{category.title}</span>
+                            </Link>
+                          </motion.div>
                         ))
                       ) : (
                         <p className="text-gray-500 px-4 py-3">No categories available</p>
@@ -168,45 +277,57 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right Side Icons */}
-          <div className="flex items-center space-x-3">
-            <button
+          {/* Right Side Icons with enhanced animations */}
+          <div className="hidden lg:flex items-center space-x-3">
+            <motion.button
+              variants={quickActionVariants}
+              whileHover="hover"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2.5 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-all duration-300 transform hover:scale-110"
+              className="p-2.5 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors duration-300"
             >
               <FaSearch className="h-5 w-5" />
-            </button>
+            </motion.button>
 
-            <Link
-              to="/favorites"
-              className="p-2.5 text-gray-600 hover:text-pink-600 rounded-full hover:bg-pink-50 transition-all duration-300 transform hover:scale-110"
-            >
-              <FaHeart className="h-5 w-5" />
-            </Link>
+            <motion.div variants={quickActionVariants} whileHover="hover">
+              <Link
+                to="/cart"
+                className="flex p-2.5 text-gray-600 hover:text-green-600 rounded-full hover:bg-green-50 transition-colors duration-300"
+              >
+                <FaShoppingCart className="h-5 w-5" />
+              </Link>
+            </motion.div>
 
-            <Link
-              to="/cart"
-              className="hidden sm:flex p-2.5 text-gray-600 hover:text-green-600 rounded-full hover:bg-green-50 transition-all duration-300 transform hover:scale-110"
-            >
-              <FaShoppingCart className="h-5 w-5" />
-            </Link>
+            <motion.div variants={quickActionVariants} whileHover="hover">
+              <Link
+                to="/favourite"
+                className="flex p-2.5 text-gray-600 hover:text-green-600 rounded-full hover:bg-green-50 transition-colors duration-300"
+              >
+                <FaHeart className="h-5 w-5" />
+              </Link>
+            </motion.div>
 
-            <button
+            <motion.button
+              variants={quickActionVariants}
+              whileHover="hover"
               onClick={() => setIsLocationModalOpen(true)}
-              className="hidden sm:flex p-2.5 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-all duration-300 transform hover:scale-110"
+              className="flex p-2.5 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors duration-300"
             >
               <FaLocationDot className="h-5 w-5" />
-            </button>
+            </motion.button>
 
-            {/* Profile Section */}
-            <div className="hidden sm:block relative">
+            {/* Profile Section with enhanced animations */}
+            <div className="relative">
               {isLoggedIn ? (
-                <div>
+                <motion.div whileHover={{ scale: 1.05 }}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center space-x-3 px-4 py-2 rounded-full hover:bg-blue-50 transition-all duration-300 transform hover:scale-105"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-full hover:bg-blue-50 transition-all duration-300"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center overflow-hidden text-white shadow-md">
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                      className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center overflow-hidden text-white shadow-md"
+                    >
                       {user?.image ? (
                         <img
                           src={user.image}
@@ -218,8 +339,8 @@ const Navbar = () => {
                           {(user?.first_name?.[0] || '') + (user?.last_name?.[0] || '')}
                         </span>
                       )}
-                    </div>
-                    <span className="hidden md:block font-medium text-gray-700">
+                    </motion.div>
+                    <span className="font-medium text-gray-700">
                       {user?.first_name || "User"}
                     </span>
                   </button>
@@ -227,9 +348,10 @@ const Navbar = () => {
                   <AnimatePresence>
                     {isProfileOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
                         className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl py-1 z-50 border border-gray-100"
                       >
                         <div className="px-4 py-3 border-b border-gray-100">
@@ -266,105 +388,209 @@ const Navbar = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               ) : (
-                <Link
-                  to="/login"
-                  className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full hover:shadow-md transition-all duration-300 transform hover:scale-105"
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <FaUserCircle className="h-5 w-5" />
-                  <span className="font-medium">Sign In</span>
-                </Link>
+                  <Link
+                    to="/login"
+                    className="flex items-center space-x-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full hover:shadow-lg transition-all duration-300"
+                  >
+                    <FaUserCircle className="h-5 w-5" />
+                    <span className="font-medium">Sign In</span>
+                  </Link>
+                </motion.div>
               )}
             </div>
+          </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2.5 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-all duration-300 transform hover:scale-110"
+          {/* Mobile Menu Button with enhanced animation */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2.5 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors duration-300"
+          >
+            <motion.div
+              animate={{ rotate: isMobileMenuOpen ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
             >
               {isMobileMenuOpen ? (
                 <FaTimes className="h-6 w-6" />
               ) : (
                 <FaBars className="h-6 w-6" />
               )}
-            </button>
-          </div>
+            </motion.div>
+          </motion.button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu with enhanced animations */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'tween' }}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={mobileMenuVariants}
             className="fixed inset-0 z-50 lg:hidden"
           >
-            <div
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               className="fixed inset-0 bg-black/20 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
             />
 
-            <motion.div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl">
+            <motion.div
+              variants={mobileMenuVariants}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl"
+            >
               <div className="flex flex-col h-full overflow-y-auto">
-                <div className="p-4 flex justify-end">
-                  <button
+                {/* Mobile Menu Header */}
+                <div className="sticky top-0 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
+                  <Link to="/" className="flex items-center space-x-3" onClick={() => setIsMobileMenuOpen(false)}>
+                    <img 
+                      src={logo} 
+                      width={45} 
+                      height={45} 
+                      className="rounded-full shadow-md" 
+                      alt="Logo" 
+                    />
+                    <span className="font-semibold text-gray-800">Ookey</span>
+                  </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-all duration-200"
+                    className="p-2 text-gray-600 hover:text-red-600 rounded-full hover:bg-red-50 transition-all duration-200"
                   >
                     <FaTimes className="h-6 w-6" />
-                  </button>
+                  </motion.button>
                 </div>
 
-                <div className="px-4 py-2 space-y-1">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                        isActive(link.path)
-                          ? link.isGreen
-                            ? 'bg-green-50 text-green-600'
-                            : 'bg-blue-50 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
+                {/* Mobile Quick Actions */}
+                <div className="px-6 py-4 flex justify-around border-b border-gray-100 bg-gray-50">
+                  {[
+                    { icon: <FaSearch />, label: 'Search', action: () => {
+                      setIsSearchOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }},
+                    { icon: <FaShoppingCart />, label: 'Cart', path: '/cart' },
+                    { icon: <FaHeart />, label: 'Favourite', path: '/favourite' },
+                    { icon: <FaLocationDot />, label: 'Location', action: () => {
+                      setIsLocationModalOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.label}
+                      variants={menuItemVariants}
+                      custom={index}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-20"
                     >
-                      {link.icon}
-                      <span className="font-medium">{link.label}</span>
-                    </Link>
+                      {item.path ? (
+                        <Link
+                          to={item.path}
+                          className="flex flex-col items-center space-y-2 p-3 text-gray-600 hover:text-blue-600"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <motion.div
+                            whileHover={{ rotate: 360 }}
+                            transition={{ duration: 0.5 }}
+                            className="h-6 w-6"
+                          >
+                            {item.icon}
+                          </motion.div>
+                          <span className="text-xs font-medium">{item.label}</span>
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={item.action}
+                          className="flex flex-col items-center space-y-2 p-3 text-gray-600 hover:text-blue-600 w-full"
+                        >
+                          <motion.div
+                            whileHover={{ rotate: 360 }}
+                            transition={{ duration: 0.5 }}
+                            className="h-6 w-6"
+                          >
+                            {item.icon}
+                          </motion.div>
+                          <span className="text-xs font-medium">{item.label}</span>
+                        </button>
+                      )}
+                    </motion.div>
                   ))}
                 </div>
 
-                <div className="mt-4 px-4 py-2">
-                  <div className="text-sm font-semibold text-gray-500 px-4 mb-2">
-                    Products Categories
-                  </div>
-                  {Array.isArray(categories[0]) ? (
-                    categories[0].map((category) => (
+                {/* Mobile Navigation Links */}
+                <div className="px-6 py-4 space-y-2">
+                  {navLinks.map((link, index) => (
+                    <motion.div
+                      key={link.path}
+                      variants={menuItemVariants}
+                      custom={index}
+                      whileHover={{ scale: 1.02, x: 10 }}
+                    >
                       <Link
-                        key={category._id}
-                        to={`/category/${category._id}`}
-                        className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all duration-200"
+                        to={link.path}
+                        className={`flex items-center space-x-4 px-5 py-3.5 rounded-xl transition-all duration-200 ${
+                          isActive(link.path)
+                            ? link.isGreen
+                              ? 'bg-green-50 text-green-600'
+                              : 'bg-blue-50 text-blue-600'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <FaStore className="h-4 w-4" />
-                        <span className="font-medium">{category.title}</span>
+                        <motion.div
+                          whileHover={{ rotate: 360 }}
+                          transition={{ duration: 0.5 }}
+                          className="w-5 h-5"
+                        >
+                          {link.icon}
+                        </motion.div>
+                        <span className="font-medium">{link.label}</span>
                       </Link>
-                    ))
-                  ) : (
-                    <p className="text-gray-500 px-4 py-3">No categories available</p>
-                  )}
+                    </motion.div>
+                  ))}
                 </div>
 
-                <div className="mt-auto px-4 py-4 border-t border-gray-100">
+                {/* Mobile Products Categories */}
+                <div className="px-6 py-4 border-t border-gray-100">
+                  <div className="text-sm font-semibold text-gray-500 mb-3 px-2">
+                    Products Categories
+                  </div>
+                  <div className="space-y-2">
+                    {Array.isArray(categories[0]) ? (
+                      categories[0].map((category) => (
+                        <Link
+                          key={category._id}
+                          to={`/category/${category._id}`}
+                          className="flex items-center space-x-4 px-5 py-3.5 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all duration-200"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <FaStore className="h-5 w-5" />
+                          <span className="font-medium">{category.title}</span>
+                        </Link>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 px-4 py-3">No categories available</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mobile Profile Section */}
+                <div className="mt-auto px-6 py-4 border-t border-gray-100 bg-gray-50">
                   {isLoggedIn ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-3 px-4 py-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-md">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-4 px-4 py-3 bg-white rounded-xl">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-md">
                           {user?.image ? (
                             <img
                               src={user.image}
@@ -372,7 +598,7 @@ const Navbar = () => {
                               className="w-full h-full object-cover rounded-full"
                             />
                           ) : (
-                            <span className="text-sm font-semibold">
+                            <span className="text-lg font-semibold">
                               {(user?.first_name?.[0] || '') + (user?.last_name?.[0] || '')}
                             </span>
                           )}
@@ -384,18 +610,39 @@ const Navbar = () => {
                           <p className="text-sm text-gray-500">{user?.email}</p>
                         </div>
                       </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                      <Link
+                        to="/profile"
+                        className="flex items-center space-x-4 px-5 py-3.5 text-gray-700 hover:bg-white rounded-xl transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        <FaSignOutAlt className="h-4 w-4" />
+                        <FaUserCircle className="h-5 w-5" />
+                        <span className="font-medium">Profile Settings</span>
+                      </Link>
+                      {user?.role === 1 && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center space-x-4 px-5 py-3.5 text-gray-700 hover:bg-white rounded-xl transition-all duration-200"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <FaStore className="h-5 w-5" />
+                          <span className="font-medium">Admin Dashboard</span>
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center space-x-4 px-5 py-3.5 text-red-600 hover:bg-white rounded-xl transition-all duration-200"
+                      >
+                        <FaSignOutAlt className="h-5 w-5" />
                         <span className="font-medium">Sign Out</span>
                       </button>
                     </div>
                   ) : (
                     <Link
                       to="/login"
-                      className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-md transition-all duration-300"
+                      className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-md transition-all duration-300"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <FaUserCircle className="h-5 w-5" />
@@ -409,13 +656,14 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* Search Overlay */}
+      {/* Search Overlay with enhanced animations */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-100 p-6"
           >
             <div className="container mx-auto max-w-4xl">
