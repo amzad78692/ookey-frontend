@@ -299,7 +299,7 @@ const Navbar = () => {
 
             <motion.div variants={quickActionVariants} whileHover="hover">
               <Link
-                to="/favourite"
+                to="/favorites"
                 className="flex p-2.5 text-gray-600 hover:text-green-600 rounded-full hover:bg-green-50 transition-colors duration-300"
               >
                 <FaHeart className="h-5 w-5" />
@@ -480,7 +480,7 @@ const Navbar = () => {
                       setIsMobileMenuOpen(false);
                     }},
                     { icon: <FaShoppingCart />, label: 'Cart', path: '/cart' },
-                    { icon: <FaHeart />, label: 'Favourite', path: '/favourite' },
+                    { icon: <FaHeart />, label: 'favorites', path: '/favorites' },
                     { icon: <FaLocationDot />, label: 'Location', action: () => {
                       setIsLocationModalOpen(true);
                       setIsMobileMenuOpen(false);
