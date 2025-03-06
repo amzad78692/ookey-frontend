@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaPlus, FaMinus, FaTrash, FaArrowLeft, FaTruck, FaGift, FaPercent, FaHome, FaCarrot, FaCalendar } from 'react-icons/fa';
+import { FaPlus, FaMinus, FaTrash, FaArrowLeft, FaTruck, FaGift, FaPercent, FaHome, FaCarrot, FaCalendar, FaShoppingBag, FaLock } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import Context from '../context';
 import SummaryApi from '../common';
@@ -12,69 +12,75 @@ const dummyCartItems = [
   {
     id: 1,
     name: "Fresh Organic Tomatoes",
-    price: 2.99,
+    price: 49.99,
     quantity: 2,
     image: "https://images.unsplash.com/photo-1546470427-f5c9439c4748",
     category: "vegetables",
-    discount: 0.5,
-    unit: "kg"
+    discount: 10,
+    unit: "kg",
+    seller: "Fresh Farm Produce"
   },
   {
     id: 2,
     name: "Green Bell Peppers",
-    price: 1.99,
+    price: 39.99,
     quantity: 3,
     image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83",
     category: "vegetables",
     discount: 0,
-    unit: "kg"
+    unit: "kg",
+    seller: "Organic Valley"
   },
   {
     id: 3,
     name: "Fresh Bananas",
-    price: 3.49,
+    price: 69.99,
     quantity: 1,
     image: "https://images.unsplash.com/photo-1543218024-57a70143c369",
     category: "fruits",
-    discount: 0.75,
-    unit: "dozen"
+    discount: 15,
+    unit: "dozen",
+    seller: "Fresh Farm Produce"
   },
   {
     id: 4,
-    name: "Red Apples",
-    price: 4.99,
+    name: "Kashmiri Red Apples",
+    price: 149.99,
     quantity: 2,
     image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6",
     category: "fruits",
-    discount: 1,
-    unit: "kg"
+    discount: 20,
+    unit: "kg",
+    seller: "Himalayan Fruits"
   },
   // Real Estate Properties
   {
     id: 101,
-    name: "Luxury Apartment Viewing",
-    price: 50.00,
+    name: "3 BHK Luxury Apartment Viewing",
+    price: 1000.00,
     quantity: 1,
     image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00",
     category: "real-estate",
     discount: 0,
     propertyType: "Apartment",
-    location: "Downtown",
+    location: "Whitefield, Bangalore",
     viewingDate: "2024-01-15",
-    description: "Premium 2BHK apartment viewing slot"
+    description: "Premium 3BHK apartment viewing slot",
+    seller: "Prestige Group"
   },
   {
     id: 102,
     name: "Villa Property Tour",
-    price: 75.00,
+    price: 1500.00,
     quantity: 1,
     image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6",
     category: "real-estate",
-    discount: 25,
+    discount: 500,
     propertyType: "Villa",
-    location: "Suburban Area",
+    location: "Electronic City, Bangalore",
     viewingDate: "2024-01-16",
-    description: "Exclusive villa tour with agent"
+    description: "Exclusive villa tour with agent",
+    seller: "Godrej Properties"
   }
 ];
 
@@ -123,10 +129,10 @@ const CartPage = () => {
       }
     },
     exit: {
-      y: -20,
+      scale: 0.95,
       opacity: 0,
       transition: {
-        duration: 0.3
+        duration: 0.2
       }
     }
   };
@@ -179,137 +185,166 @@ const CartPage = () => {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="bg-gradient-to-r from-white to-gray-50 rounded-xl shadow-sm p-6 mb-4 flex items-center hover:shadow-lg transition-all duration-300 border border-gray-100"
+      className="bg-white rounded-2xl shadow-sm p-6 mb-4 flex items-center hover:shadow-lg transition-all duration-300 border border-gray-100 relative overflow-hidden group"
     >
-      <div className="relative group">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="w-28 h-28 object-cover rounded-lg shadow-md transform group-hover:scale-105 transition-transform duration-300"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity rounded-lg"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative">
+        <div className="relative group overflow-hidden rounded-xl">
+          <img
+            src={item.image}
+            alt={item.name}
+            className="w-32 h-32 object-cover rounded-xl shadow-md transform group-hover:scale-105 transition-transform duration-500"
+          />
+          {item.discount > 0 && (
+            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+              -₹{item.discount}
+            </div>
+          )}
+        </div>
       </div>
-      <div className="ml-6 flex-grow">
-        <h3 className="font-semibold text-lg text-gray-800 mb-1">{item.name}</h3>
-        <p className="text-blue-600 font-medium text-lg">${item.price.toFixed(2)}</p>
+      <div className="ml-8 flex-grow relative">
+        <div className="flex justify-between items-start mb-2">
+          <div>
+            <h3 className="font-semibold text-xl text-gray-800 group-hover:text-blue-600 transition-colors duration-300">{item.name}</h3>
+            <p className="text-sm text-gray-500">Sold by: {item.seller}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl font-bold text-blue-600">₹{item.price.toFixed(2)}</span>
+          </div>
+        </div>
         {item.category === 'real-estate' ? (
-          <div className="text-sm text-gray-600 mt-2 space-y-1">
-            <p className="flex items-center">
+          <div className="space-y-2 mt-3">
+            <p className="flex items-center text-gray-600">
               <FaHome className="mr-2 text-blue-500" />
-              {item.propertyType} • {item.location}
+              <span className="font-medium">{item.propertyType}</span>
+              <span className="mx-2">•</span>
+              <span>{item.location}</span>
             </p>
-            <p className="flex items-center">
+            <p className="flex items-center text-gray-600">
               <FaCalendar className="mr-2 text-blue-500" />
-              Viewing on: {item.viewingDate}
+              Viewing on: <span className="font-medium ml-1">{item.viewingDate}</span>
             </p>
           </div>
         ) : (
-          <p className="text-sm text-gray-600 mt-1">Per {item.unit}</p>
+          <div className="flex items-center space-x-3 mt-1">
+            <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">
+              Per {item.unit}
+            </span>
+            {item.discount > 0 && (
+              <span className="text-green-600 text-sm flex items-center">
+                <FaPercent className="w-3 h-3 mr-1" />
+                {Math.round((item.discount / item.price) * 100)}% off
+              </span>
+            )}
+          </div>
         )}
-        {item.discount > 0 && (
-          <p className="text-green-600 text-sm mt-2 flex items-center">
-            <FaPercent className="mr-1 w-3 h-3" />
-            Save ${item.discount}
-          </p>
-        )}
-      </div>
-      <div className="flex flex-col items-end space-y-3">
-        <div className="flex items-center space-x-2 bg-white rounded-full p-1.5 shadow-sm border border-gray-100">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-            className="p-2 rounded-full hover:bg-blue-50 transition-colors"
-          >
-            <FaMinus className="w-3 h-3 text-blue-600" />
-          </motion.button>
-          <span className="w-8 text-center font-medium text-gray-700">{item.quantity}</span>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-            className="p-2 rounded-full hover:bg-blue-50 transition-colors"
-          >
-            <FaPlus className="w-3 h-3 text-blue-600" />
-          </motion.button>
+        
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-gray-50 rounded-full p-1 shadow-sm border border-gray-100">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                className="p-2 rounded-full hover:bg-white transition-colors"
+              >
+                <FaMinus className="w-3 h-3 text-blue-600" />
+              </motion.button>
+              <span className="w-8 text-center font-medium text-gray-700">{item.quantity}</span>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                className="p-2 rounded-full hover:bg-white transition-colors"
+              >
+                <FaPlus className="w-3 h-3 text-blue-600" />
+              </motion.button>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => removeItem(item.id)}
+              className="text-red-500 hover:text-red-600 text-sm flex items-center px-4 py-2 rounded-full hover:bg-red-50 transition-colors border border-red-200 hover:border-red-300"
+            >
+              <FaTrash className="w-3 h-3 mr-1.5" />
+              Remove
+            </motion.button>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Total</p>
+            <p className="text-lg font-bold text-gray-800">
+              ₹{(item.price * item.quantity).toFixed(2)}
+            </p>
+          </div>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => removeItem(item.id)}
-          className="text-red-500 hover:text-red-600 text-sm flex items-center px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors"
-        >
-          <FaTrash className="w-3 h-3 mr-1.5" />
-          Remove
-        </motion.button>
       </div>
     </motion.div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-12 mt-20">
-        <motion.button
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-blue-600 mb-8 group bg-white px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all"
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-center mb-12"
         >
-          <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" />
-          Continue Shopping
-        </motion.button>
-
-        <motion.h1 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="text-3xl font-bold mb-10 text-gray-800 flex items-center"
-        >
-          Your Cart
-          {cartItems.length > 0 && (
-            <span className="ml-4 text-sm font-normal text-gray-500 bg-gray-100 px-4 py-1 rounded-full">
-              {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
-            </span>
-          )}
-        </motion.h1>
+          <div className="flex items-center space-x-8">
+            <motion.button
+              whileHover={{ x: -5 }}
+              onClick={() => navigate(-1)}
+              className="flex items-center text-gray-600 hover:text-blue-600 group bg-white px-5 py-2.5 rounded-full shadow-sm hover:shadow-md transition-all"
+            >
+              <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" />
+              Continue Shopping
+            </motion.button>
+            <h1 className="text-4xl font-bold text-gray-800 flex items-center">
+              Shopping Cart
+              {cartItems.length > 0 && (
+                <span className="ml-4 text-sm font-normal text-white bg-blue-600 px-4 py-1 rounded-full shadow-md">
+                  {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
+                </span>
+              )}
+            </h1>
+          </div>
+        </motion.div>
         
         {cartItems.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100"
+            className="text-center py-32 bg-white rounded-3xl shadow-sm border border-gray-100"
           >
-            <img 
-              src="/empty-cart.svg" 
-              alt="Empty Cart" 
-              className="w-64 h-64 mx-auto mb-8 opacity-75"
-            />
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Looks like you haven't added anything to your cart yet</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/')}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-full hover:shadow-lg transition-all duration-300"
-            >
-              Start Shopping
-            </motion.button>
+            <div className="max-w-md mx-auto">
+              <FaShoppingBag className="w-24 h-24 mx-auto text-blue-100 mb-8" />
+              <h2 className="text-3xl font-bold mb-4 text-gray-800">Your cart is empty</h2>
+              <p className="text-gray-600 mb-8 text-lg">Start adding items to your cart and they will appear here</p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/')}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-10 py-4 rounded-full hover:shadow-lg transition-all duration-300 text-lg font-medium"
+              >
+                Start Shopping
+              </motion.button>
+            </div>
           </motion.div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <motion.div 
-              className="lg:col-span-2"
+              className="lg:col-span-2 space-y-8"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
             >
               {/* Groceries Section */}
               {(groupedItems.vegetables || groupedItems.fruits) && (
-                <div className="mb-8">
+                <div>
                   <div className="flex items-center mb-6">
-                    <div className="bg-green-100 p-2 rounded-full mr-3">
-                      <FaCarrot className="text-green-600 w-5 h-5" />
+                    <div className="bg-green-100 p-3 rounded-xl mr-4">
+                      <FaCarrot className="text-green-600 w-6 h-6" />
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-800">Fresh Produce</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Fresh Produce</h2>
                   </div>
                   <AnimatePresence>
                     {[...(groupedItems.vegetables || []), ...(groupedItems.fruits || [])].map(renderCartItem)}
@@ -319,12 +354,12 @@ const CartPage = () => {
 
               {/* Real Estate Section */}
               {groupedItems['real-estate'] && (
-                <div className="mb-8">
+                <div>
                   <div className="flex items-center mb-6">
-                    <div className="bg-blue-100 p-2 rounded-full mr-3">
-                      <FaHome className="text-blue-600 w-5 h-5" />
+                    <div className="bg-blue-100 p-3 rounded-xl mr-4">
+                      <FaHome className="text-blue-600 w-6 h-6" />
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-800">Property Viewings</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Property Viewings</h2>
                   </div>
                   <AnimatePresence>
                     {groupedItems['real-estate'].map(renderCartItem)}
@@ -336,14 +371,14 @@ const CartPage = () => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl mt-6 flex items-center shadow-sm"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 p-8 rounded-2xl mt-6 flex items-center shadow-lg text-white"
               >
-                <div className="bg-white p-3 rounded-full mr-4 shadow-sm">
-                  <FaTruck className="text-blue-600 w-6 h-6" />
+                <div className="bg-white/20 p-4 rounded-xl mr-6">
+                  <FaTruck className="text-white w-8 h-8" />
                 </div>
                 <div>
-                  <p className="font-semibold text-blue-900 mb-1">Estimated Delivery Time</p>
-                  <p className="text-blue-700">
+                  <p className="font-semibold text-xl mb-2">Estimated Delivery Time</p>
+                  <p className="text-blue-100 text-lg">
                     {groupedItems['real-estate'] 
                       ? 'Property viewing slots will be confirmed via email'
                       : `${deliveryTime} minutes for grocery delivery`}
@@ -356,17 +391,17 @@ const CartPage = () => {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-lg p-8 sticky top-24 border border-gray-100"
+                className="bg-white rounded-3xl shadow-xl p-8 sticky top-24 border border-gray-100"
               >
-                <h2 className="text-2xl font-semibold mb-6 text-gray-800">Order Summary</h2>
+                <h2 className="text-2xl font-bold mb-8 text-gray-800">Order Summary</h2>
 
                 {/* Promo Code Input */}
                 <div className="mb-8">
                   <div className="flex items-center space-x-3 mb-4">
-                    <div className="bg-blue-100 p-2 rounded-full">
-                      <FaGift className="text-blue-600 w-4 h-4" />
+                    <div className="bg-blue-100 p-2.5 rounded-xl">
+                      <FaGift className="text-blue-600 w-5 h-5" />
                     </div>
-                    <span className="font-medium text-gray-800">Have a promo code?</span>
+                    <span className="font-medium text-gray-800 text-lg">Have a promo code?</span>
                   </div>
                   <div className="flex space-x-2">
                     <input
@@ -374,14 +409,14 @@ const CartPage = () => {
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                       placeholder="Enter code"
-                      className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="flex-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700"
                     />
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={applyPromoCode}
                       disabled={isApplyingPromo}
-                      className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                      className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md font-medium"
                     >
                       {isApplyingPromo ? 'Applying...' : 'Apply'}
                     </motion.button>
@@ -393,25 +428,26 @@ const CartPage = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-gray-600 text-lg">
                     <span>Subtotal</span>
-                    <span className="font-medium">${totalAmount.toFixed(2)}</span>
+                    <span className="font-medium">₹{totalAmount.toFixed(2)}</span>
                   </div>
                   {discount > 0 && (
-                    <div className="flex justify-between text-green-600">
+                    <div className="flex justify-between text-green-600 text-lg">
                       <span>Discount</span>
-                      <span className="font-medium">-${discount.toFixed(2)}</span>
+                      <span className="font-medium">-₹{discount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-gray-600">
-                    <span>Service Fee</span>
-                    <span className="font-medium">$5.00</span>
+                  <div className="flex justify-between text-gray-600 text-lg">
+                    <span>Delivery Fee</span>
+                    <span className="font-medium">₹49.00</span>
                   </div>
-                  <div className="border-t border-gray-100 pt-4 mt-4">
-                    <div className="flex justify-between font-semibold text-xl text-gray-800">
+                  <div className="border-t-2 border-gray-100 pt-4 mt-4">
+                    <div className="flex justify-between font-bold text-2xl text-gray-800">
                       <span>Total</span>
-                      <span>${(totalAmount - discount + 5).toFixed(2)}</span>
+                      <span>₹{(totalAmount - discount + 49).toFixed(2)}</span>
                     </div>
+                    <p className="text-sm text-gray-500 mt-1">Including GST</p>
                   </div>
                 </div>
 
@@ -419,25 +455,33 @@ const CartPage = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate('/checkout')}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl mt-8 hover:shadow-lg transition-all flex items-center justify-center space-x-3 font-medium"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl mt-8 hover:shadow-lg transition-all flex items-center justify-center space-x-3 font-medium text-lg relative overflow-hidden group"
                 >
-                  <span>Proceed to Checkout</span>
-                  <span className="bg-blue-500 bg-opacity-25 px-3 py-1 rounded-full text-sm">
+                  <span className="relative z-10 flex items-center">
+                    <FaLock className="w-4 h-4 mr-2" />
+                    Proceed to Pay
+                  </span>
+                  <span className="bg-white/20 px-3 py-1 rounded-full text-sm relative z-10">
                     {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
                   </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </motion.button>
 
                 <div className="mt-6">
                   {groupedItems['real-estate'] ? (
-                    <p className="text-sm text-gray-500 flex items-center justify-center bg-gray-50 px-4 py-3 rounded-lg">
-                      <FaHome className="mr-2 text-blue-500" />
-                      Property viewing slots are subject to availability
-                    </p>
+                    <div className="bg-gray-50 rounded-xl p-4 flex items-start space-x-3">
+                      <FaHome className="text-blue-500 w-5 h-5 mt-0.5" />
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Property viewing slots are subject to availability. We'll confirm your booking via email/WhatsApp within 24 hours.
+                      </p>
+                    </div>
                   ) : (
-                    <p className="text-sm text-gray-500 flex items-center justify-center bg-gray-50 px-4 py-3 rounded-lg">
-                      <FaTruck className="mr-2 text-blue-500" />
-                      Free delivery on orders above $50
-                    </p>
+                    <div className="bg-gray-50 rounded-xl p-4 flex items-start space-x-3">
+                      <FaTruck className="text-blue-500 w-5 h-5 mt-0.5" />
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Free delivery on orders above ₹999. Standard delivery fee of ₹49 applies for orders below ₹999.
+                      </p>
+                    </div>
                   )}
                 </div>
               </motion.div>

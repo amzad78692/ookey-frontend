@@ -98,9 +98,13 @@ const App = () => {
           fetchUserPincode(position.coords.latitude, position.coords.longitude);
         },
         () => {
-          setLocationAllowed(false); // Location access denied
+          setLocationAllowed(false);
+          Navigate('/not-serving'); // Redirect when location access is denied
         }
       );
+    } else {
+      setLocationAllowed(false);
+      Navigate('/not-serving'); // Redirect if geolocation is not supported
     }
   };
 
