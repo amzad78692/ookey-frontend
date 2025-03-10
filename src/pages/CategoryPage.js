@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link,useNavigate } from 'react-router-dom';
-import { FaShoppingCart, FaStar, FaFilter, FaSort, FaSpinner, FaHeart, FaShare, FaMapMarkerAlt } from 'react-icons/fa';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { FaShoppingCart, FaStar, FaFilter, FaSort, FaSpinner, FaHeart, FaShare, FaMapMarkerAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch } from 'react-redux';
 import SummaryApi from '../common';
@@ -17,6 +17,7 @@ const CategoryPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
 
+
   const categories = useSelector((state) => state.category);
   useEffect(() => {
     const fetchCategoryData = async () => {
@@ -24,18 +25,17 @@ const CategoryPage = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(SummaryApi.getProducts.url, {
+        const response = await fetch(`${SummaryApi.getProducts.url}?category_id=${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
 
-        
         const data = await response.json();
-        console.log(id,data)
-        const categoryWiseData = data.data.filter(product => product.category_id === id)
-        setCategoryList(categoryWiseData || []);
+        console.log(id, data);
+
+        setCategoryList(data.data || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -43,7 +43,9 @@ const CategoryPage = () => {
       }
     };
 
-    fetchCategoryData();
+    if (id) {
+      fetchCategoryData();
+    }
   }, [id]);
 
   const handleAddToCart = (item) => {
@@ -76,6 +78,208 @@ const CategoryPage = () => {
   const filteredItems = categoryList.filter(item => selectedCategory === 'all' ? true : item.category === selectedCategory);
   const sortedItems = sortItems(filteredItems);
   console.log(sortedItems)
+
+  const ProductCard = ({ item, onAddToCart, onShare }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const nextImage = (e) => {
+      e.stopPropagation();
+      setCurrentImageIndex((prev) => (prev + 1) % item.images.length);
+    };
+
+    const prevImage = (e) => {
+      e.stopPropagation();
+      setCurrentImageIndex((prev) => (prev - 1 + item.images.length) % item.images.length);
+    };
+
+    const discountedPrice = item.price - (item.price * (item.discount / 100));
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group relative"
+      >
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+          {/* Product Image Carousel */}
+          <div className="relative h-72 overflow-hidden bg-gray-100">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentImageIndex}
+                src={item.images[currentImageIndex]}
+                alt={`${item.name} - Image ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                initial={{ opacity: 0, scale: 1.2 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              />
+            </AnimatePresence>
+
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            {/* Image Navigation Buttons */}
+            {item.images.length > 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isHovered ? 1 : 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4"
+              >
+                <button
+                  onClick={prevImage}
+                  className="p-2 rounded-full bg-white/90 shadow-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                >
+                  <FaChevronLeft className="text-gray-800 text-sm" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="p-2 rounded-full bg-white/90 shadow-lg hover:bg-white transition-all duration-200 transform hover:scale-110"
+                >
+                  <FaChevronRight className="text-gray-800 text-sm" />
+                </button>
+              </motion.div>
+            )}
+
+            {/* Image Indicators */}
+            {item.images.length > 1 && (
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                {item.images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImageIndex(index);
+                    }}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-300 transform ${
+                      currentImageIndex === index 
+                        ? 'bg-white scale-125 w-3'
+                        : 'bg-white/60 hover:bg-white/80'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Discount Badge */}
+            {item.discount > 0 && (
+              <div className="absolute top-4 left-4">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg"
+                >
+                  {item.discount}% OFF
+                </motion.div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="absolute top-4 right-4 flex gap-2">
+              <motion.button
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare(item);
+                }}
+                className="p-2 bg-white/90 rounded-full shadow-lg hover:bg-white transition-all duration-200"
+              >
+                <FaShare className="text-gray-700 text-sm" />
+              </motion.button>
+              <motion.button
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 bg-white/90 rounded-full shadow-lg hover:bg-white transition-all duration-200"
+              >
+                <FaHeart className="text-gray-700 text-sm" />
+              </motion.button>
+            </div>
+
+            {/* Stock Badge */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="absolute bottom-4 left-4"
+            >
+              {item.stock < 10 ? (
+                <div className="bg-orange-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
+                  Only {item.stock} left
+                </div>
+              ) : (
+                <div className="bg-green-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
+                  In Stock
+                </div>
+              )}
+            </motion.div>
+          </div>
+
+          {/* Product Details */}
+          <div className="p-6">
+            {/* Title and Description */}
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors duration-300">
+                {item.name}
+              </h3>
+              <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                {item.description}
+              </p>
+            </div>
+
+            {/* Price Section */}
+            <div className="mb-5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                  ₹{discountedPrice.toLocaleString()}
+                </span>
+                {item.discount > 0 && (
+                  <span className="text-lg text-gray-400 line-through">
+                    ₹{item.price.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Add to Cart Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onAddToCart(item)}
+              className="w-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white py-3.5 px-4 rounded-xl hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-md hover:shadow-xl"
+            >
+              <FaShoppingCart className="text-sm" />
+              Add to Cart
+            </motion.button>
+
+            {/* Additional Info */}
+            <div className="mt-5 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-1.5 text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
+                  <FaMapMarkerAlt className="text-blue-500" />
+                  <span>Fast Delivery</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
+                  <FaStar className="text-yellow-400" />
+                  <span>Top Rated</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
 
   if (loading) {
     return (
@@ -197,99 +401,12 @@ const CategoryPage = () => {
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedItems.map((item, index) => (
-            <motion.div
+            <ProductCard
               key={item._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group"
-            >
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                {/* Product Image Placeholder with Gradient */}
-                <div className="h-56 bg-gradient-to-br from-gray-100 to-gray-200 relative">
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300" />
-
-                  {/* Action Buttons */}
-                  <div className="absolute top-4 right-4 flex gap-2 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleShare(item)}
-                      className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <FaShare className="text-gray-600 text-sm" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <FaHeart className="text-gray-600 text-sm" />
-                    </motion.button>
-                  </div>
-
-                  {/* Stock Badge */}
-                  <div className="absolute bottom-4 left-4">
-                    {item.stock < 10 ? (
-                      <div className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-                        Only {item.stock} left
-                      </div>
-                    ) : (
-                      <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-                        In Stock
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Product Details */}
-                <div className="p-6">
-                  {/* Title and Description */}
-                  <div className="mb-4">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                      {item.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  {/* Price Section */}
-                  <div className="mb-4">
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-3xl font-bold text-gray-900">
-                        ₹{(item.price).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Add to Cart Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleAddToCart(item)}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-2 font-medium shadow-sm hover:shadow-md"
-                  >
-                    <FaShoppingCart className="text-sm" />
-                    Add to Cart
-                  </motion.button>
-
-                  {/* Additional Info */}
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <FaMapMarkerAlt className="text-gray-400" />
-                        <span>Fast Delivery</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FaStar className="text-yellow-400" />
-                        <span>Top Rated</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+              item={item}
+              onAddToCart={handleAddToCart}
+              onShare={handleShare}
+            />
           ))}
         </div>
 

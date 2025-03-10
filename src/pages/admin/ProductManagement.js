@@ -88,6 +88,30 @@ const ProductManagement = () => {
       }
       
     } else {
+
+      const image_urls = await Promise.all(
+        formData.image_url.map(async (item) => {
+          try {
+            const response = await fetch(SummaryApi.uploadImage.url, {
+              method: SummaryApi.uploadImage.method,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ image: item }),
+            });
+      
+            const data = await response.json();
+      
+            return data.image_url || data.url || null; // Use correct key
+          } catch (error) {
+            console.error("Image upload failed:", error);
+            return null; // Prevent undefined values
+          }
+        })
+      );
+      
+      formData.image_url = image_urls.filter(url => url !== null); // Remove null values
+      
       // Add new product
       const response = await fetch(SummaryApi.addProduct.url, {
         method: SummaryApi.addProduct.method,
@@ -96,16 +120,19 @@ const ProductManagement = () => {
           "Authorization": `Bearer ${token}`
         },
         credentials: 'include',
-        body: JSON.stringify({
-          ...formData
-        }),
+        body: JSON.stringify(formData),
       });
-      if (response.status) {
+      
+      const result = await response.json(); // Parse response JSON
+      console.log("Add Product Response:", result);
+      
+      if (response.ok) {  // ✅ Use response.ok instead of response.status
         toast.success('Product added successfully');
         fetchProducts();
       } else {
-        toast.error(response.message || 'Failed to add product');
+        toast.error(result.message || 'Failed to add product');
       }
+      
     }
     handleCloseModal();
   };

@@ -7,7 +7,6 @@ import patternImage from '../assest/pattern2.jpg'
 const HeroSection = () => {
   const navigate = useNavigate();
   const category = useSelector((state) => state.category);
-  console.log(category)
   const [activeCategory, setActiveCategory] = useState('realestate')
   const [searchQuery, setSearchQuery] = useState('')
 

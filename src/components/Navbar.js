@@ -102,7 +102,7 @@ const Navbar = () => {
         ease: [0.6, -0.05, 0.01, 0.99]
       }
     }),
-    exit: { 
+    exit: {
       opacity: 0,
       x: -20,
       transition: {
@@ -140,10 +140,10 @@ const Navbar = () => {
 
   // Quick action button hover animation
   const quickActionVariants = {
-    hover: { 
+    hover: {
       scale: 1.1,
       rotate: 5,
-      transition: { 
+      transition: {
         type: "spring",
         stiffness: 400,
         damping: 10
@@ -152,11 +152,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed w-full top-0 z-50 transition-all duration-500 ${
-      isScrolled 
-        ? 'bg-white/90 backdrop-blur-md shadow-lg' 
+    <nav className={`fixed w-full top-0 z-50 transition-all duration-500 ${isScrolled
+        ? 'bg-white/90 backdrop-blur-md shadow-lg'
         : 'bg-white shadow-sm'
-    }`}>
+      }`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Logo with enhanced animation */}
@@ -166,12 +165,12 @@ const Navbar = () => {
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             <Link to="/" className="flex items-center space-x-2 z-50">
-              <img 
-                src={logo} 
-                width={80} 
-                height={80} 
-                className="rounded-full shadow-md" 
-                alt="Logo" 
+              <img
+                src={logo}
+                width={80}
+                height={80}
+                className="rounded-full shadow-md"
+                alt="Logo"
               />
             </Link>
           </motion.div>
@@ -189,13 +188,12 @@ const Navbar = () => {
               >
                 <Link
                   to={link.path}
-                  className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 ${
-                    isActive(link.path)
+                  className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 ${isActive(link.path)
                       ? link.isGreen
                         ? 'bg-green-50 text-green-600 shadow-sm shadow-green-100'
                         : 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-100'
                       : 'text-gray-600 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <motion.div
                     whileHover={{ rotate: 360 }}
@@ -215,11 +213,10 @@ const Navbar = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
                 onMouseEnter={() => setIsProductsDropdownOpen(true)}
-                className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 ${
-                  isProductsDropdownOpen 
-                    ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-100' 
+                className={`px-5 py-2.5 rounded-full flex items-center space-x-2.5 transition-all duration-300 ${isProductsDropdownOpen
+                    ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-100'
                     : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <FaStore className="h-4 w-4" />
                 <span className="font-medium">All Products</span>
@@ -328,17 +325,10 @@ const Navbar = () => {
                       transition={{ duration: 0.5 }}
                       className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center overflow-hidden text-white shadow-md"
                     >
-                      {user?.image ? (
-                        <img
-                          src={user.image}
-                          alt="User"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-sm font-semibold">
-                          {(user?.first_name?.[0] || '') + (user?.last_name?.[0] || '')}
-                        </span>
-                      )}
+
+                      <span className="text-sm font-semibold">
+                        {(user?.first_name?.[0] || '') + (user?.last_name?.[0] || '')}
+                      </span>
                     </motion.div>
                     <span className="font-medium text-gray-700">
                       {user?.first_name || "User"}
@@ -453,12 +443,12 @@ const Navbar = () => {
                 {/* Mobile Menu Header */}
                 <div className="sticky top-0 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
                   <Link to="/" className="flex items-center space-x-3" onClick={() => setIsMobileMenuOpen(false)}>
-                    <img 
-                      src={logo} 
-                      width={45} 
-                      height={45} 
-                      className="rounded-full shadow-md" 
-                      alt="Logo" 
+                    <img
+                      src={logo}
+                      width={45}
+                      height={45}
+                      className="rounded-full shadow-md"
+                      alt="Logo"
                     />
                     <span className="font-semibold text-gray-800">Ookey</span>
                   </Link>
@@ -475,16 +465,20 @@ const Navbar = () => {
                 {/* Mobile Quick Actions */}
                 <div className="px-6 py-4 flex justify-around border-b border-gray-100 bg-gray-50">
                   {[
-                    { icon: <FaSearch />, label: 'Search', action: () => {
-                      setIsSearchOpen(true);
-                      setIsMobileMenuOpen(false);
-                    }},
+                    {
+                      icon: <FaSearch />, label: 'Search', action: () => {
+                        setIsSearchOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }
+                    },
                     { icon: <FaShoppingCart />, label: 'Cart', path: '/cart' },
                     { icon: <FaHeart />, label: 'favorites', path: '/favorites' },
-                    { icon: <FaLocationDot />, label: 'Location', action: () => {
-                      setIsLocationModalOpen(true);
-                      setIsMobileMenuOpen(false);
-                    }}
+                    {
+                      icon: <FaLocationDot />, label: 'Location', action: () => {
+                        setIsLocationModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }
+                    }
                   ].map((item, index) => (
                     <motion.div
                       key={item.label}
@@ -539,13 +533,12 @@ const Navbar = () => {
                     >
                       <Link
                         to={link.path}
-                        className={`flex items-center space-x-4 px-5 py-3.5 rounded-xl transition-all duration-200 ${
-                          isActive(link.path)
+                        className={`flex items-center space-x-4 px-5 py-3.5 rounded-xl transition-all duration-200 ${isActive(link.path)
                             ? link.isGreen
                               ? 'bg-green-50 text-green-600'
                               : 'bg-blue-50 text-blue-600'
                             : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                          }`}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <motion.div
